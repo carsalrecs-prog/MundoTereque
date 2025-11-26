@@ -55,9 +55,7 @@
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
         
-        .game-gradient { 
-            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #a18cd1 100%); 
-        }
+        .game-gradient { background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #a18cd1 100%); }
         
         .pending-pulse { animation: pulse-border 2s infinite; }
         @keyframes pulse-border { 
@@ -66,17 +64,16 @@
             100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); } 
         }
         
-        .ai-message-box { 
-            background: rgba(255, 255, 255, 0.9); 
-            border-left: 4px solid #8b5cf6; 
-            padding: 1rem; 
-            border-radius: 0.5rem; 
-            margin-top: 1rem; 
-            color: #4c1d95; 
-        }
-        
-        /* Estilos para listas del modal de ayuda (Color oscuro para fondo claro) */
+        .ai-message-box { background: rgba(255, 255, 255, 0.9); border-left: 4px solid #8b5cf6; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; color: #4c1d95; }
         .help-list li { margin-bottom: 8px; display: flex; gap: 8px; align-items: start; color: #4b5563; }
+        
+        /* Animación para día de celebración */
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .celebration-card { animation: celebrate 2s infinite ease-in-out; border: 2px solid #fbbf24; }
     </style>
 </head>
 <body>
@@ -96,14 +93,7 @@
             appId: "1:676402129654:web:199572eb9981cd10741ad7"
         };
 
-        // LISTA DE MODELOS A PROBAR (Priorizando el 2.5)
-        const GEMINI_MODELS_TO_TRY = [
-            "gemini-2.5-flash-preview-09-2025", // Opción 1: La versión 2.5 solicitada
-            "gemini-1.5-flash",                 // Opción 2: El estándar actual
-            "gemini-1.5-flash-001",             // Opción 3: Versión específica estable
-            "gemini-1.5-pro"                    // Opción 4: Versión Pro
-        ];
-        
+        const GEMINI_MODELS_TO_TRY = [ "gemini-2.5-flash-preview-09-2025", "gemini-1.5-flash", "gemini-1.5-flash-001", "gemini-1.5-pro" ];
         const GEMINI_API_KEY = "AIzaSyCh1ETP6wY9fO-nFsfmEYBcZgAB6G9LZ9E"; 
 
         // ==========================================
@@ -138,11 +128,14 @@
         const Brain = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>;
         const Clock = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
         const Info = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>;
+        const CalendarIcon = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
+        const Bell = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>;
 
         const Toast = ({ message, type = 'success', onClose }) => {
-            useEffect(() => { const timer = setTimeout(onClose, 3000); return () => clearTimeout(timer); }, [onClose]);
-            const bgClass = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
-            return (<div className={`fixed bottom-4 right-4 ${bgClass} text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-2 toast-enter z-50`}>{type === 'success' ? <Check size={18} /> : type === 'error' ? <X size={18} /> : <AlertCircle size={18} />}<span className="font-bold">{message}</span></div>);
+            useEffect(() => { const timer = setTimeout(onClose, 4000); return () => clearTimeout(timer); }, [onClose]);
+            const bgClass = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'info' ? 'bg-blue-500' : 'bg-yellow-500';
+            const icon = type === 'success' ? <Check size={18} /> : type === 'error' ? <X size={18} /> : type === 'info' ? <Bell size={18} /> : <AlertCircle size={18} />;
+            return (<div className={`fixed bottom-4 right-4 ${bgClass} text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-2 toast-enter z-[100]`}>{icon}<span className="font-bold">{message}</span></div>);
         };
 
         const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
@@ -160,27 +153,11 @@
                             <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={24}/></button>
                         </div>
                         <div className="space-y-4 text-gray-600 help-list">
-                            <div>
-                                <h4 className="font-bold text-purple-600 flex items-center gap-2"><Search size={18}/> Modo Wiki</h4>
-                                <p className="text-sm">Es la base de datos oficial. Aquí guardas datos concretos (tallas, gustos, alergias).</p>
-                                <ul className="list-disc ml-5 text-xs mt-1 space-y-1">
-                                    <li>Usa el botón "Flor" o "Tereque" para ver el perfil de cada uno.</li>
-                                    <li>Usa el <strong>Oráculo</strong> para preguntarle cosas a la IA sobre esa persona.</li>
-                                </ul>
-                            </div>
+                            <div><h4 className="font-bold text-purple-600 flex items-center gap-2"><Search size={18}/> Modo Wiki</h4><p className="text-sm">Base de datos oficial. Guarda datos concretos (tallas, gustos).</p></div>
                             <hr className="border-gray-200"/>
-                            <div>
-                                <h4 className="font-bold text-purple-600 flex items-center gap-2"><Dice size={18}/> Modo Juego</h4>
-                                <p className="text-sm">Para divertirse y conocerse mejor.</p>
-                                <ul className="list-disc ml-5 text-xs mt-1 space-y-1">
-                                    <li>La IA genera una pregunta sorpresa.</li>
-                                    <li>Si ambos responden, se guarda en la Wiki automáticamente.</li>
-                                    <li>Si solo uno responde, se guarda en <strong>Pendientes</strong> hasta que el otro responda su parte.</li>
-                                </ul>
-                            </div>
-                            <div className="bg-blue-50 p-3 rounded-xl text-xs text-blue-700 border border-blue-100">
-                                💡 <strong>Tip:</strong> Puedes descargar toda la info en Excel usando el botón <Download size={10} className="inline"/> arriba a la derecha.
-                            </div>
+                            <div><h4 className="font-bold text-purple-600 flex items-center gap-2"><Dice size={18}/> Modo Juego</h4><p className="text-sm">Preguntas sorpresa para conocerse mejor.</p></div>
+                            <hr className="border-gray-200"/>
+                            <div><h4 className="font-bold text-purple-600 flex items-center gap-2"><CalendarIcon size={18}/> Fechas</h4><p className="text-sm">Guarda cumpleaños y aniversarios. Te avisa 3 días antes y el mismo día.</p></div>
                         </div>
                     </div>
                 </div>
@@ -190,7 +167,7 @@
         const App = () => {
             const [user, setUser] = useState(null);
             const [activeProfile, setActiveProfile] = useState('novia');
-            const [viewMode, setViewMode] = useState('wiki');
+            const [viewMode, setViewMode] = useState('wiki'); // 'wiki', 'game', 'dates'
             const [entries, setEntries] = useState([]);
             const [categories, setCategories] = useState(['Básica', 'Gustos', 'Difícil / Profunda', 'Familia', 'Historia', 'Curiosidad']);
             const [formData, setFormData] = useState({ category: '', question: '', answer: '' });
@@ -213,31 +190,31 @@
             const [pendingAnswers, setPendingAnswers] = useState({});
             const [gameAnalysis, setGameAnalysis] = useState('');
             const [isAnalyzingGame, setIsAnalyzingGame] = useState(false);
+            
+            // Nuevos estados para Fechas
+            const [datesList, setDatesList] = useState([]);
+            const [newDateTitle, setNewDateTitle] = useState('');
+            const [newDateValue, setNewDateValue] = useState('');
 
             useEffect(() => {
                 const initAuth = async () => {
-                    try {
-                        await auth.signInAnonymously();
-                    } catch (error) {
-                        console.error("Auth error:", error);
-                        if(error.code === 'auth/invalid-api-key') {
-                            showToast("Error de configuración API", 'error');
-                        }
-                    }
+                    try { await auth.signInAnonymously(); } catch (error) { showToast("Error Auth", 'error'); }
                 };
                 initAuth();
                 return auth.onAuthStateChanged((u) => setUser(u));
             }, []);
 
+            // Sincronizar Wiki
             useEffect(() => {
                 if (!user) return;
                 const wikiRef = db.collection(collectionName).doc('data').collection('wiki_entries');
                 return wikiRef.onSnapshot((snapshot) => {
                     const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => b.timestamp - a.timestamp);
                     setEntries(loaded); setIsLoading(false);
-                }, (err) => { console.error(err); setIsLoading(false); });
+                }, (err) => { setIsLoading(false); });
             }, [user]);
 
+            // Sincronizar Juegos Pendientes
             useEffect(() => {
                 if (!user) return;
                 const pendingRef = db.collection(collectionName).doc('data').collection('pending_games');
@@ -246,19 +223,30 @@
                 });
             }, [user]);
 
+            // Sincronizar Fechas Importantes
+            useEffect(() => {
+                if (!user) return;
+                const datesRef = db.collection(collectionName).doc('data').collection('important_dates');
+                return datesRef.onSnapshot((snapshot) => {
+                    const loadedDates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setDatesList(loadedDates);
+                    checkUpcomingDates(loadedDates); // Verificar fechas al cargar
+                });
+            }, [user]);
+
             useEffect(() => {
                 if (!user) return;
                 const catRef = db.collection(collectionName).doc('data').collection('settings').doc('categories');
-                return catRef.onSnapshot((docSnap) => {
-                    if (docSnap.exists) { setCategories(docSnap.data().list || ['Básica']); }
-                });
+                return catRef.onSnapshot((docSnap) => { if (docSnap.exists) { setCategories(docSnap.data().list || ['Básica']); } });
             }, [user]);
 
             const showToast = (message, type = 'success') => { setToast({ message, type }); };
 
             useEffect(() => { if (!formData.category && categories.length > 0) setFormData(prev => ({...prev, category: categories[0]})); }, [categories]);
             useEffect(() => {
-                // El fondo ya no cambia por JS, se maneja por CSS
+                if(viewMode === 'game') document.body.style.backgroundColor = '#f3e8ff'; 
+                else if(viewMode === 'dates') document.body.style.backgroundColor = '#fff7ed'; // Color crema para fechas
+                else document.body.style.backgroundColor = activeProfile === 'novia' ? '#fff1f2' : '#eff6ff';
                 setAiResponse(''); setAiQuery(''); setEditingId(null); setFormData(prev => ({ category: categories[0], question: '', answer: '' })); setGameAnalysis('');
             }, [activeProfile, viewMode]);
 
@@ -279,10 +267,13 @@
             const handleEdit = (e) => { setEditingId(e.id); setFormData({ category: e.category, question: e.question, answer: e.answer }); window.scrollTo({top:0, behavior:'smooth'}); showToast("Editando...", 'success'); };
             const handleCancelEdit = () => { setEditingId(null); setFormData(prev => ({ ...prev, question: '', answer: '' })); };
             const handleDelete = (id) => setDeleteModal({ isOpen: true, id, type: 'wiki' });
+            
             const confirmDelete = async () => {
                 const { id, type } = deleteModal;
+                if (!id) return;
                 if(type === 'wiki') { await db.collection(collectionName).doc('data').collection('wiki_entries').doc(id).delete(); if(editingId===id) handleCancelEdit(); showToast("Eliminado 🗑️"); }
-                if(type === 'game_skip') { await db.collection(collectionName).doc('data').collection('pending_games').doc(id).delete(); showToast("Descartado"); }
+                else if(type === 'game_skip') { await db.collection(collectionName).doc('data').collection('pending_games').doc(id).delete(); showToast("Descartado"); }
+                else if(type === 'date') { await db.collection(collectionName).doc('data').collection('important_dates').doc(id).delete(); showToast("Fecha eliminada"); }
                 setDeleteModal({ isOpen: false, id: null, type: null });
             };
 
@@ -304,69 +295,38 @@
                 link.download = "wiki_amor.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
             };
 
-            // --- FUNCIÓN DE IA ROBUSTA (CON FALLBACK DE MODELOS) ---
+            // --- IA LOGIC ---
             const fetchAI = async (prompt) => {
-                if(!GEMINI_API_KEY.startsWith("AIza")) return "⚠️ Error: API Key inválida.";
-                
-                const safetySettings = [
-                    { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
-                    { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" },
-                    { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" }, 
-                    { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" }
-                ];
-
-                // Intentamos conectar con los modelos uno por uno
+                if(!GEMINI_API_KEY.startsWith("AIza")) return "⚠️ Error API Key";
+                const safetySettings = [ { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" } ];
                 for (const model of GEMINI_MODELS_TO_TRY) {
                     try {
-                        //console.log(`Intentando conectar con modelo: ${model}...`);
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
-                            method: 'POST',
-                            headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ 
-                                contents: [{ parts: [{ text: prompt }] }],
-                                safetySettings: safetySettings 
-                            })
-                        });
-                        
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], safetySettings: safetySettings }) });
                         const d = await res.json();
-                        
-                        // Si hay error, lanzamos excepción para pasar al siguiente modelo
-                        if (d.error) {
-                            //console.warn(`Modelo ${model} falló:`, d.error.message);
-                            throw new Error(d.error.message);
-                        }
-
-                        // Si llegamos aquí, ¡funciona!
-                        if (d.promptFeedback && d.promptFeedback.blockReason) return "⚠️ Respuesta bloqueada por seguridad.";
+                        if (d.error) throw new Error(d.error.message);
                         return d.candidates?.[0]?.content?.parts?.[0]?.text || "La IA no respondió.";
-
-                    } catch (e) {
-                        // Continúa al siguiente modelo en el bucle
-                        continue; 
-                    }
+                    } catch (e) { continue; }
                 }
-                
-                // Si llegamos aquí, todos los modelos fallaron
-                return "⚠️ La IA está durmiendo (Error de conexión con todos los modelos).";
+                return "⚠️ La IA está durmiendo.";
             };
 
             const handleAskAI = async (e) => {
                 e.preventDefault(); if(!aiQuery.trim()) return;
                 setIsAiThinking(true);
                 const context = entries.filter(x => x.target === activeProfile).map(x => `- ${x.category}: P:${x.question} R:${x.answer}`).join("\n");
-                const resp = await fetchAI(`Eres un experto asistente de relaciones enfocado en ${activeProfile==='novia'?'Flor':'Tereque'}. Datos de la pareja: ${context}. Pregunta del usuario: ${aiQuery}. Responde de forma breve, útil y cariñosa.`);
+                const resp = await fetchAI(`Experto en ${activeProfile==='novia'?'Flor':'Tereque'}. Datos: ${context}. Pregunta: ${aiQuery}. Responde breve y cariñoso.`);
                 setAiResponse(resp); setIsAiThinking(false);
             };
 
             const handleGenerateGameQuestion = async () => {
                 setIsGeneratingGame(true); setGameQuestion(''); setAnswerFlor(''); setAnswerTereque('');
-                const q = await fetchAI("Genera una pregunta interesante, divertida o profunda para que una pareja (Flor y Tereque) se responda mutuamente para conocerse mejor. Solo dame la pregunta, nada más.");
+                const q = await fetchAI("Genera una pregunta interesante para parejas (Flor y Tereque) para conocerse mejor. Solo la pregunta.");
                 setGameQuestion(q); setIsGeneratingGame(false);
             };
 
             const handleAnalyzeGame = async () => {
                 setIsAnalyzingGame(true);
-                const resp = await fetchAI(`Actúa como experto en relaciones. Analiza estas respuestas de pareja. Pregunta: "${gameQuestion}". Flor dijo: "${answerFlor}". Tereque dijo: "${answerTereque}". Dame una conclusión breve, divertida y romántica.`);
+                const resp = await fetchAI(`Analiza: Pregunta "${gameQuestion}". Flor: "${answerFlor}". Tereque: "${answerTereque}". Breve y divertido.`);
                 setGameAnalysis(resp); setIsAnalyzingGame(false);
             };
 
@@ -402,8 +362,58 @@
 
             const handleSkipPendingGame = (id) => setDeleteModal({ isOpen: true, id, type: 'game_skip' });
 
-            // --- TEMAS RESTAURADOS ---
-            // Volvemos a los colores originales claros
+            // --- LÓGICA DE FECHAS ---
+            const handleAddDate = async (e) => {
+                e.preventDefault();
+                if(!newDateTitle || !newDateValue) return;
+                await db.collection(collectionName).doc('data').collection('important_dates').add({
+                    title: newDateTitle,
+                    date: newDateValue, // YYYY-MM-DD
+                    timestamp: Date.now()
+                });
+                showToast("Fecha guardada 📅");
+                setNewDateTitle(''); setNewDateValue('');
+            };
+
+            const handleDeleteDate = (id) => setDeleteModal({ isOpen: true, id, type: 'date' });
+
+            const getDaysUntil = (dateString) => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const [year, month, day] = dateString.split('-').map(Number);
+                
+                // Crear fecha para este año
+                let targetDate = new Date(today.getFullYear(), month - 1, day);
+                
+                // Si ya pasó este año, calcular para el próximo
+                if (targetDate < today) {
+                    targetDate.setFullYear(today.getFullYear() + 1);
+                }
+                
+                const diffTime = targetDate - today;
+                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            };
+
+            const checkUpcomingDates = (dates) => {
+                const upcoming = dates.filter(d => {
+                    const days = getDaysUntil(d.date);
+                    return days <= 3;
+                });
+
+                if (upcoming.length > 0) {
+                    // Evitar spammear si ya se mostró recientemente (simple logic)
+                    // Aquí mostramos el más cercano
+                    const closest = upcoming.sort((a,b) => getDaysUntil(a.date) - getDaysUntil(b.date))[0];
+                    const days = getDaysUntil(closest.date);
+                    
+                    if (days === 0) {
+                        showToast(`🎉 ¡HOY ES ${closest.title.toUpperCase()}! 🎉`, 'success');
+                    } else {
+                        showToast(`📅 ¡Faltan ${days} días para ${closest.title}!`, 'info');
+                    }
+                }
+            };
+
             const theme = activeProfile === 'novia' ? { text: 'text-rose-600', bg: 'bg-rose-500', border: 'border-rose-100', iconBg: 'bg-rose-100', gradientAi: 'from-rose-500 to-orange-400' } : { text: 'text-blue-600', bg: 'bg-blue-500', border: 'border-blue-100', iconBg: 'bg-blue-100', gradientAi: 'from-blue-500 to-cyan-400' };
             
             if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-500"><div className="spinner border-rose-500 mb-4"></div>Conectando con el amor...</div>;
@@ -411,7 +421,7 @@
             return (
                 <div className="min-h-screen p-4 md:p-8 max-w-5xl mx-auto pb-20">
                     {toast && <Toast message={toast.message} type={toast.type} onClose={()=>setToast(null)} />}
-                    <ConfirmationModal isOpen={deleteModal.isOpen} onClose={()=>setDeleteModal({isOpen:false})} onConfirm={confirmDelete} message={deleteModal.type==='wiki'?"¿Borrar recuerdo?":"¿Descartar pregunta?"} />
+                    <ConfirmationModal isOpen={deleteModal.isOpen} onClose={()=>setDeleteModal({isOpen:false})} onConfirm={confirmDelete} message={deleteModal.type==='wiki'?"¿Borrar recuerdo?":deleteModal.type==='date'?"¿Borrar fecha importante?":"¿Descartar pregunta?"} />
                     <HelpModal isOpen={helpModalOpen} onClose={()=>setHelpModalOpen(false)} />
                     
                     {/* HEADER */}
@@ -419,6 +429,7 @@
                         <div className="flex gap-2 bg-gray-100 p-1 rounded-2xl items-center">
                             <button onClick={()=>setViewMode('wiki')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='wiki'?'bg-white shadow text-gray-800':'text-gray-400 hover:text-gray-600'}`}><Search size={18}/> Wiki</button>
                             <button onClick={()=>setViewMode('game')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='game'?'bg-purple-500 shadow text-white':'text-gray-400 hover:text-gray-600'} ${pendingGames.length>0?'pending-pulse border-2 border-purple-300':''}`}><Dice size={18}/> Juego {pendingGames.length>0 && <span className="bg-red-500 text-white text-xs px-1 rounded-full">{pendingGames.length}</span>}</button>
+                            <button onClick={()=>setViewMode('dates')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='dates'?'bg-yellow-500 shadow text-white':'text-gray-400 hover:text-gray-600'}`}><CalendarIcon size={18}/> Fechas</button>
                             <button onClick={()=>setHelpModalOpen(true)} className="ml-2 p-2 text-gray-400 hover:text-purple-500"><Info size={20}/></button>
                         </div>
                         {viewMode==='wiki' && (
@@ -430,9 +441,44 @@
                         )}
                     </header>
 
-                    {viewMode === 'game' ? (
+                    {viewMode === 'dates' && (
                         <div className="fade-in max-w-3xl mx-auto space-y-8">
-                            {/* GAME UI */}
+                            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-8 rounded-3xl shadow-2xl text-center text-white">
+                                <h2 className="text-3xl font-extrabold mb-4 drop-shadow-md">📅 Fechas Importantes</h2>
+                                <form onSubmit={handleAddDate} className="flex flex-col md:flex-row gap-3 bg-white/20 p-4 rounded-2xl backdrop-blur-md">
+                                    <input value={newDateTitle} onChange={e=>setNewDateTitle(e.target.value)} placeholder="Título (ej: Aniversario)" className="flex-1 p-3 rounded-xl bg-white/90 text-gray-800 outline-none" required />
+                                    <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 rounded-xl bg-white/90 text-gray-800 outline-none" required />
+                                    <button type="submit" className="bg-white text-orange-500 font-bold px-6 py-3 rounded-xl shadow hover:bg-gray-50">Agregar</button>
+                                </form>
+                            </div>
+
+                            <div className="grid gap-4">
+                                {datesList.sort((a,b) => getDaysUntil(a.date) - getDaysUntil(b.date)).map(date => {
+                                    const daysLeft = getDaysUntil(date.date);
+                                    const isToday = daysLeft === 0;
+                                    return (
+                                        <div key={date.id} className={`bg-white p-6 rounded-2xl shadow-md border-l-8 relative flex items-center justify-between ${isToday ? 'border-yellow-400 celebration-card' : 'border-gray-300'}`}>
+                                            <div>
+                                                <h3 className="font-bold text-xl text-gray-800">{date.title}</h3>
+                                                <p className="text-gray-500 text-sm flex items-center gap-2">
+                                                    <CalendarIcon size={14}/> {new Date(date.date).toLocaleDateString()} 
+                                                    {isToday ? <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs font-bold">¡HOY!</span> : <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">Faltan {daysLeft} días</span>}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                {isToday && <span className="text-4xl animate-bounce">🎉</span>}
+                                                <button onClick={()=>handleDeleteDate(date.id)} className="text-gray-300 hover:text-red-400 p-2"><Trash2 size={20}/></button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                {datesList.length === 0 && <p className="text-center text-gray-400 mt-8">No hay fechas guardadas.</p>}
+                            </div>
+                        </div>
+                    )}
+
+                    {viewMode === 'game' && (
+                        <div className="fade-in max-w-3xl mx-auto space-y-8">
                             <div className="game-gradient p-8 rounded-3xl shadow-2xl text-center text-white relative overflow-hidden">
                                 <h2 className="text-3xl font-extrabold mb-4 relative z-10 text-white drop-shadow-md">✨ Preguntas de Pareja ✨</h2>
                                 {!gameQuestion ? (
@@ -452,7 +498,6 @@
                                 )}
                             </div>
                             
-                            {/* PENDIENTES */}
                             {pendingGames.length > 0 && (
                                 <div>
                                     <h3 className="text-xl font-bold text-purple-800 mb-4 flex gap-2"><Clock/> Pendientes ({pendingGames.length})</h3>
@@ -478,9 +523,10 @@
                                 </div>
                             )}
                         </div>
-                    ) : (
+                    )}
+
+                    {viewMode === 'wiki' && (
                         <div className="grid md:grid-cols-12 gap-6 fade-in">
-                            {/* WIKI FORM */}
                             <div className="md:col-span-4">
                                 <div className={`glass-panel p-6 rounded-3xl sticky top-28 border-t-4 ${theme.border}`}>
                                     <h2 className={`text-xl font-bold mb-4 flex gap-2 ${theme.text}`}>{editingId?<Edit2/>:<Plus/>}{editingId?'Editar':'Nuevo'}</h2>
@@ -495,7 +541,6 @@
                                     </form>
                                 </div>
                             </div>
-                            {/* WIKI LIST & ORACLE */}
                             <div className="md:col-span-8 space-y-6">
                                 <div className={`rounded-3xl p-6 text-white shadow-xl bg-gradient-to-r ${theme.gradientAi} relative overflow-hidden`}>
                                     <div className="absolute top-0 right-0 p-4 opacity-20"><Sparkles size={100}/></div>
