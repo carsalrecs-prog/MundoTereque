@@ -55,7 +55,9 @@
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
         
-        .game-gradient { background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #a18cd1 100%); }
+        .game-gradient { 
+            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #a18cd1 100%); 
+        }
         
         .pending-pulse { animation: pulse-border 2s infinite; }
         @keyframes pulse-border { 
@@ -64,16 +66,26 @@
             100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); } 
         }
         
-        .ai-message-box { background: rgba(255, 255, 255, 0.9); border-left: 4px solid #8b5cf6; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; color: #4c1d95; }
+        .ai-message-box { 
+            background: rgba(255, 255, 255, 0.9); 
+            border-left: 4px solid #8b5cf6; 
+            padding: 1rem; 
+            border-radius: 0.5rem; 
+            margin-top: 1rem; 
+            color: #4c1d95; 
+        }
+        
         .help-list li { margin-bottom: 8px; display: flex; gap: 8px; align-items: start; color: #4b5563; }
         
-        /* Animación para día de celebración */
         @keyframes celebrate {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
         .celebration-card { animation: celebrate 2s infinite ease-in-out; border: 2px solid #fbbf24; }
+        
+        .toggle-checkbox:checked { right: 0; border-color: #f97316; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #f97316; }
     </style>
 </head>
 <body>
@@ -125,11 +137,11 @@
         const Check = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"/></svg>;
         const Dice = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><circle cx="15" cy="15" r="2"></circle></svg>;
         const AlertCircle = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>;
-        const Brain = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>;
         const Clock = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
         const Info = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>;
         const CalendarIcon = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
         const Bell = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>;
+        const Repeat = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>;
 
         const Toast = ({ message, type = 'success', onClose }) => {
             useEffect(() => { const timer = setTimeout(onClose, 4000); return () => clearTimeout(timer); }, [onClose]);
@@ -157,7 +169,7 @@
                             <hr className="border-gray-200"/>
                             <div><h4 className="font-bold text-purple-600 flex items-center gap-2"><Dice size={18}/> Modo Juego</h4><p className="text-sm">Preguntas sorpresa para conocerse mejor.</p></div>
                             <hr className="border-gray-200"/>
-                            <div><h4 className="font-bold text-purple-600 flex items-center gap-2"><CalendarIcon size={18}/> Fechas</h4><p className="text-sm">Guarda cumpleaños y aniversarios. Te avisa 3 días antes y el mismo día.</p></div>
+                            <div><h4 className="font-bold text-purple-600 flex items-center gap-2"><CalendarIcon size={18}/> Fechas</h4><p className="text-sm">Guarda cumpleaños y aniversarios. Usa <Repeat size={14}/> para que se repitan cada año.</p></div>
                         </div>
                     </div>
                 </div>
@@ -167,7 +179,7 @@
         const App = () => {
             const [user, setUser] = useState(null);
             const [activeProfile, setActiveProfile] = useState('novia');
-            const [viewMode, setViewMode] = useState('wiki'); // 'wiki', 'game', 'dates'
+            const [viewMode, setViewMode] = useState('wiki');
             const [entries, setEntries] = useState([]);
             const [categories, setCategories] = useState(['Básica', 'Gustos', 'Difícil / Profunda', 'Familia', 'Historia', 'Curiosidad']);
             const [formData, setFormData] = useState({ category: '', question: '', answer: '' });
@@ -195,6 +207,10 @@
             const [datesList, setDatesList] = useState([]);
             const [newDateTitle, setNewDateTitle] = useState('');
             const [newDateValue, setNewDateValue] = useState('');
+            const [newDateRepeats, setNewDateRepeats] = useState(true);
+            const [relationshipStart, setRelationshipStart] = useState(null);
+            const [showDateInput, setShowDateInput] = useState(false);
+            const [editingDateId, setEditingDateId] = useState(null);
 
             useEffect(() => {
                 const initAuth = async () => {
@@ -223,15 +239,23 @@
                 });
             }, [user]);
 
-            // Sincronizar Fechas Importantes
+            // Sincronizar Fechas Importantes y Relacion
             useEffect(() => {
                 if (!user) return;
                 const datesRef = db.collection(collectionName).doc('data').collection('important_dates');
-                return datesRef.onSnapshot((snapshot) => {
+                const unsubDates = datesRef.onSnapshot((snapshot) => {
                     const loadedDates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setDatesList(loadedDates);
-                    checkUpcomingDates(loadedDates); // Verificar fechas al cargar
+                    checkUpcomingDates(loadedDates); 
                 });
+                
+                // Sincronizar fecha relacion
+                const relRef = db.collection(collectionName).doc('data').collection('settings').doc('relationship');
+                const unsubRel = relRef.onSnapshot(doc => {
+                    if(doc.exists) setRelationshipStart(doc.data().date);
+                });
+
+                return () => { unsubDates(); unsubRel(); };
             }, [user]);
 
             useEffect(() => {
@@ -245,9 +269,10 @@
             useEffect(() => { if (!formData.category && categories.length > 0) setFormData(prev => ({...prev, category: categories[0]})); }, [categories]);
             useEffect(() => {
                 if(viewMode === 'game') document.body.style.backgroundColor = '#f3e8ff'; 
-                else if(viewMode === 'dates') document.body.style.backgroundColor = '#fff7ed'; // Color crema para fechas
+                else if(viewMode === 'dates') document.body.style.backgroundColor = '#fff7ed'; 
                 else document.body.style.backgroundColor = activeProfile === 'novia' ? '#fff1f2' : '#eff6ff';
                 setAiResponse(''); setAiQuery(''); setEditingId(null); setFormData(prev => ({ category: categories[0], question: '', answer: '' })); setGameAnalysis('');
+                setEditingDateId(null); setNewDateTitle(''); setNewDateValue(''); setNewDateRepeats(true);
             }, [activeProfile, viewMode]);
 
             const handleInputChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -363,54 +388,90 @@
             const handleSkipPendingGame = (id) => setDeleteModal({ isOpen: true, id, type: 'game_skip' });
 
             // --- LÓGICA DE FECHAS ---
-            const handleAddDate = async (e) => {
+            const handleSaveDate = async (e) => {
                 e.preventDefault();
                 if(!newDateTitle || !newDateValue) return;
-                await db.collection(collectionName).doc('data').collection('important_dates').add({
-                    title: newDateTitle,
-                    date: newDateValue, // YYYY-MM-DD
-                    timestamp: Date.now()
-                });
-                showToast("Fecha guardada 📅");
-                setNewDateTitle(''); setNewDateValue('');
+                const datesRef = db.collection(collectionName).doc('data').collection('important_dates');
+                try {
+                    if (editingDateId) {
+                        await datesRef.doc(editingDateId).update({ title: newDateTitle, date: newDateValue, repeats: newDateRepeats });
+                        showToast("Fecha actualizada ✨"); setEditingDateId(null);
+                    } else {
+                        await datesRef.add({ title: newDateTitle, date: newDateValue, repeats: newDateRepeats, timestamp: Date.now() });
+                        showToast("Fecha guardada 📅");
+                    }
+                    setNewDateTitle(''); setNewDateValue(''); setNewDateRepeats(true);
+                } catch (error) { showToast("Error al guardar fecha", 'error'); }
             };
 
             const handleDeleteDate = (id) => setDeleteModal({ isOpen: true, id, type: 'date' });
 
-            const getDaysUntil = (dateString) => {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const [year, month, day] = dateString.split('-').map(Number);
-                
-                // Crear fecha para este año
-                let targetDate = new Date(today.getFullYear(), month - 1, day);
-                
-                // Si ya pasó este año, calcular para el próximo
-                if (targetDate < today) {
-                    targetDate.setFullYear(today.getFullYear() + 1);
+            const handleEditDate = (date) => {
+                setEditingDateId(date.id); setNewDateTitle(date.title); setNewDateValue(date.date); setNewDateRepeats(date.repeats !== false);
+                window.scrollTo({ top: 0, behavior: 'smooth' }); showToast("Editando fecha...", 'info');
+            };
+
+            const handleCancelDateEdit = () => { setEditingDateId(null); setNewDateTitle(''); setNewDateValue(''); setNewDateRepeats(true); };
+
+            const handleSaveRelationshipDate = async () => {
+                if (!newDateValue) return;
+                await db.collection(collectionName).doc('data').collection('settings').doc('relationship').set({ date: newDateValue });
+                showToast("¡Historia iniciada! ❤️"); setShowDateInput(false); setNewDateValue('');
+            };
+
+            const formatDateDisplay = (isoDateString) => {
+                if (!isoDateString) return "";
+                const [y, m, d] = isoDateString.split('-');
+                const date = new Date(y, m - 1, d);
+                return date.toLocaleDateString();
+            };
+
+            const getDaysUntil = (dateObjOrString) => {
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const dateString = typeof dateObjOrString === 'string' ? dateObjOrString : dateObjOrString.date;
+                const repeats = typeof dateObjOrString === 'string' ? true : (dateObjOrString.repeats !== false);
+                const [y, m, d] = dateString.split('-').map(Number);
+                if (repeats) {
+                    let target = new Date(today.getFullYear(), m - 1, d);
+                    if (target < today) target.setFullYear(today.getFullYear() + 1);
+                    return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+                } else {
+                    let target = new Date(y, m - 1, d);
+                    return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
                 }
+            };
+
+            // FIX: Accurate Duration Calculation (manual calculation)
+            const calculateDuration = (dateString) => {
+                if(!dateString) return {years:0, months:0, days:0};
+                const [y, m, d] = dateString.split('-').map(Number);
+                const start = new Date(y, m-1, d);
+                const now = new Date();
+                now.setHours(0,0,0,0);
                 
-                const diffTime = targetDate - today;
-                return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                let years = now.getFullYear() - start.getFullYear();
+                let months = now.getMonth() - start.getMonth();
+                let days = now.getDate() - start.getDate();
+                
+                if (days < 0) {
+                    months--;
+                    const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                    days += prevMonth.getDate();
+                }
+                if (months < 0) {
+                    years--;
+                    months += 12;
+                }
+                return {years, months, days};
             };
 
             const checkUpcomingDates = (dates) => {
-                const upcoming = dates.filter(d => {
-                    const days = getDaysUntil(d.date);
-                    return days <= 3;
-                });
-
+                const upcoming = dates.filter(d => { const days = getDaysUntil(d); return days >= 0 && days <= 3; });
                 if (upcoming.length > 0) {
-                    // Evitar spammear si ya se mostró recientemente (simple logic)
-                    // Aquí mostramos el más cercano
-                    const closest = upcoming.sort((a,b) => getDaysUntil(a.date) - getDaysUntil(b.date))[0];
-                    const days = getDaysUntil(closest.date);
-                    
-                    if (days === 0) {
-                        showToast(`🎉 ¡HOY ES ${closest.title.toUpperCase()}! 🎉`, 'success');
-                    } else {
-                        showToast(`📅 ¡Faltan ${days} días para ${closest.title}!`, 'info');
-                    }
+                    const closest = upcoming.sort((a,b) => getDaysUntil(a) - getDaysUntil(b))[0];
+                    const days = getDaysUntil(closest);
+                    if (days === 0) showToast(`🎉 ¡HOY ES ${closest.title.toUpperCase()}! 🎉`, 'success');
+                    else showToast(`📅 ¡Faltan ${days} días para ${closest.title}!`, 'info');
                 }
             };
 
@@ -418,13 +479,15 @@
             
             if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-500"><div className="spinner border-rose-500 mb-4"></div>Conectando con el amor...</div>;
 
+            const duration = calculateDuration(relationshipStart);
+            const daysToAnniversary = relationshipStart ? getDaysUntil({date: relationshipStart, repeats: true}) : 0;
+
             return (
                 <div className="min-h-screen p-4 md:p-8 max-w-5xl mx-auto pb-20">
                     {toast && <Toast message={toast.message} type={toast.type} onClose={()=>setToast(null)} />}
                     <ConfirmationModal isOpen={deleteModal.isOpen} onClose={()=>setDeleteModal({isOpen:false})} onConfirm={confirmDelete} message={deleteModal.type==='wiki'?"¿Borrar recuerdo?":deleteModal.type==='date'?"¿Borrar fecha importante?":"¿Descartar pregunta?"} />
                     <HelpModal isOpen={helpModalOpen} onClose={()=>setHelpModalOpen(false)} />
                     
-                    {/* HEADER */}
                     <header className="mb-6 glass-panel p-2 rounded-3xl flex flex-wrap justify-between gap-4 sticky top-2 z-50 shadow-lg">
                         <div className="flex gap-2 bg-gray-100 p-1 rounded-2xl items-center">
                             <button onClick={()=>setViewMode('wiki')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='wiki'?'bg-white shadow text-gray-800':'text-gray-400 hover:text-gray-600'}`}><Search size={18}/> Wiki</button>
@@ -443,36 +506,80 @@
 
                     {viewMode === 'dates' && (
                         <div className="fade-in max-w-3xl mx-auto space-y-8">
-                            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-8 rounded-3xl shadow-2xl text-center text-white">
-                                <h2 className="text-3xl font-extrabold mb-4 drop-shadow-md">📅 Fechas Importantes</h2>
-                                <form onSubmit={handleAddDate} className="flex flex-col md:flex-row gap-3 bg-white/20 p-4 rounded-2xl backdrop-blur-md">
-                                    <input value={newDateTitle} onChange={e=>setNewDateTitle(e.target.value)} placeholder="Título (ej: Aniversario)" className="flex-1 p-3 rounded-xl bg-white/90 text-gray-800 outline-none" required />
-                                    <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 rounded-xl bg-white/90 text-gray-800 outline-none" required />
-                                    <button type="submit" className="bg-white text-orange-500 font-bold px-6 py-3 rounded-xl shadow hover:bg-gray-50">Agregar</button>
+                            
+                            <div className="bg-white p-8 rounded-3xl shadow-xl border-t-8 border-rose-500 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 opacity-10 p-4"><Heart size={120} className="text-rose-500"/></div>
+                                <h2 className="text-3xl font-extrabold text-gray-800 mb-6 flex items-center gap-2"><Heart className="text-rose-500"/> Nuestra Historia</h2>
+                                
+                                {relationshipStart && !showDateInput ? (
+                                    <div className="space-y-6 relative z-10">
+                                        <div className="grid grid-cols-3 gap-4 text-center">
+                                            <div className="bg-rose-50 p-4 rounded-2xl"><p className="text-4xl font-bold text-rose-500">{duration.years}</p><p className="text-gray-500 text-xs uppercase tracking-wide">Años</p></div>
+                                            <div className="bg-rose-50 p-4 rounded-2xl"><p className="text-4xl font-bold text-rose-500">{duration.months}</p><p className="text-gray-500 text-xs uppercase tracking-wide">Meses</p></div>
+                                            <div className="bg-rose-50 p-4 rounded-2xl"><p className="text-4xl font-bold text-rose-500">{duration.days}</p><p className="text-gray-500 text-xs uppercase tracking-wide">Días</p></div>
+                                        </div>
+                                        <div className="bg-rose-600 text-white p-4 rounded-xl flex justify-between items-center shadow-lg">
+                                            <div><p className="text-rose-100 text-xs uppercase font-bold">Próximo Aniversario</p><p className="font-bold text-lg">Faltan {daysToAnniversary} días 🎉</p></div>
+                                            <button onClick={()=>setShowDateInput(true)} className="text-rose-200 hover:text-white"><Edit2 size={18}/></button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-4 relative z-10">
+                                        <p className="text-gray-500 mb-4">¿Cuándo comenzó su historia?</p>
+                                        <div className="flex gap-2 justify-center">
+                                            <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 border rounded-xl bg-rose-50" />
+                                            <button onClick={handleSaveRelationshipDate} className="bg-rose-500 text-white px-6 rounded-xl font-bold shadow hover:bg-rose-600">Guardar Inicio</button>
+                                            {relationshipStart && <button onClick={()=>setShowDateInput(false)} className="text-gray-400 px-3">Cancelar</button>}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-8 rounded-3xl shadow-xl text-center text-white">
+                                <h2 className="text-2xl font-bold mb-4 drop-shadow-md">{editingDateId ? '✏️ Editar Fecha' : '📅 Otras Fechas Importantes'}</h2>
+                                <form onSubmit={handleSaveDate} className="flex flex-col gap-3 bg-white/20 p-4 rounded-2xl backdrop-blur-md text-left">
+                                    <div className="flex flex-col md:flex-row gap-3">
+                                        <input value={newDateTitle} onChange={e=>setNewDateTitle(e.target.value)} placeholder="Título (ej: Viaje a París)" className="flex-1 p-3 rounded-xl bg-white/90 text-gray-800 outline-none" required />
+                                        <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 rounded-xl bg-white/90 text-gray-800 outline-none" required />
+                                    </div>
+                                    <div className="flex items-center justify-between bg-white/10 p-2 rounded-lg">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox" checked={newDateRepeats} onChange={e=>setNewDateRepeats(e.target.checked)} className="w-5 h-5 text-orange-500 rounded bg-white border-0" />
+                                            <span className="text-sm font-bold">Repetir cada año <span className="font-normal opacity-80">(Cumpleaños, Aniversarios)</span></span>
+                                        </label>
+                                        <div className="flex gap-2">
+                                            {editingDateId && <button type="button" onClick={handleCancelDateEdit} className="bg-white/30 text-white font-bold px-4 py-2 rounded-xl shadow hover:bg-white/40 transition-colors">Cancelar</button>}
+                                            <button type="submit" className="bg-white text-orange-500 font-bold px-6 py-2 rounded-xl shadow hover:bg-gray-50 transition-colors">{editingDateId ? 'Actualizar' : 'Agregar'}</button>
+                                        </div>
+                                    </div>
                                 </form>
                             </div>
 
                             <div className="grid gap-4">
-                                {datesList.sort((a,b) => getDaysUntil(a.date) - getDaysUntil(b.date)).map(date => {
-                                    const daysLeft = getDaysUntil(date.date);
+                                {datesList.sort((a,b) => getDaysUntil(a) - getDaysUntil(b)).map(date => {
+                                    const daysLeft = getDaysUntil(date);
                                     const isToday = daysLeft === 0;
+                                    const isPast = daysLeft < 0;
+                                    const isEditing = editingDateId === date.id;
+                                    const cardClass = isEditing ? 'border-orange-500 ring-2 ring-orange-300 transform scale-105 transition-all' : isToday ? 'border-yellow-400 celebration-card' : isPast ? 'border-gray-300 opacity-70' : 'border-orange-300';
                                     return (
-                                        <div key={date.id} className={`bg-white p-6 rounded-2xl shadow-md border-l-8 relative flex items-center justify-between ${isToday ? 'border-yellow-400 celebration-card' : 'border-gray-300'}`}>
+                                        <div key={date.id} className={`bg-white p-6 rounded-2xl shadow-md border-l-8 relative flex items-center justify-between ${cardClass}`}>
                                             <div>
-                                                <h3 className="font-bold text-xl text-gray-800">{date.title}</h3>
+                                                <h3 className="font-bold text-xl text-gray-800 flex items-center gap-2">{date.title} {date.repeats !== false && <Repeat size={14} className="text-gray-400" title="Se repite anualmente"/>}</h3>
                                                 <p className="text-gray-500 text-sm flex items-center gap-2">
-                                                    <CalendarIcon size={14}/> {new Date(date.date).toLocaleDateString()} 
-                                                    {isToday ? <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs font-bold">¡HOY!</span> : <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">Faltan {daysLeft} días</span>}
+                                                    <CalendarIcon size={14}/> {formatDateDisplay(date.date)} 
+                                                    {isToday ? <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs font-bold">¡HOY!</span> : isPast ? <span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-xs">Pasó hace {Math.abs(daysLeft)} días</span> : <span className="bg-orange-50 text-orange-600 px-2 py-0.5 rounded text-xs">Faltan {daysLeft} días</span>}
                                                 </p>
                                             </div>
-                                            <div className="flex items-center gap-4">
-                                                {isToday && <span className="text-4xl animate-bounce">🎉</span>}
-                                                <button onClick={()=>handleDeleteDate(date.id)} className="text-gray-300 hover:text-red-400 p-2"><Trash2 size={20}/></button>
+                                            <div className="flex items-center gap-2">
+                                                {isToday && <span className="text-4xl animate-bounce mr-2">🎉</span>}
+                                                <button onClick={()=>handleEditDate(date)} className="text-gray-300 hover:text-blue-500 p-2 rounded-full hover:bg-blue-50 transition-colors" title="Editar"><Edit2 size={18}/></button>
+                                                <button onClick={()=>handleDeleteDate(date.id)} className="text-gray-300 hover:text-red-400 p-2 rounded-full hover:bg-red-50 transition-colors" title="Eliminar"><Trash2 size={18}/></button>
                                             </div>
                                         </div>
                                     );
                                 })}
-                                {datesList.length === 0 && <p className="text-center text-gray-400 mt-8">No hay fechas guardadas.</p>}
+                                {datesList.length === 0 && <p className="text-center text-gray-400 mt-8">No hay otras fechas guardadas.</p>}
                             </div>
                         </div>
                     )}
@@ -497,7 +604,6 @@
                                     </div>
                                 )}
                             </div>
-                            
                             {pendingGames.length > 0 && (
                                 <div>
                                     <h3 className="text-xl font-bold text-purple-800 mb-4 flex gap-2"><Clock/> Pendientes ({pendingGames.length})</h3>
@@ -507,14 +613,8 @@
                                                 <button onClick={()=>handleSkipPendingGame(g.id)} className="absolute top-4 right-4 text-gray-300 hover:text-red-400 transition-all"><Trash2 size={16}/></button>
                                                 <h4 className="font-bold text-gray-800 mb-4 pr-8">"{g.question}"</h4>
                                                 <div className="space-y-3">
-                                                    <div className={`p-3 rounded-xl border ${g.answerFlor?'bg-rose-50 border-rose-100':'bg-white border-dashed border-rose-200'}`}>
-                                                        <span className="text-xs font-bold text-rose-500 flex gap-1 mb-1 items-center"><Heart size={12}/> Flor {g.answerFlor && <Check size={14} className="text-green-500"/>}</span>
-                                                        {g.answerFlor ? <p className="text-sm italic text-gray-700">"{g.answerFlor}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-gray-50 rounded-lg resize-none focus:ring-2 focus:ring-rose-300 outline-none" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_flor`]:e.target.value}))} value={pendingAnswers[`${g.id}_flor`]||''}/>}
-                                                    </div>
-                                                    <div className={`p-3 rounded-xl border ${g.answerTereque?'bg-blue-50 border-blue-100':'bg-white border-dashed border-blue-200'}`}>
-                                                        <span className="text-xs font-bold text-blue-500 flex gap-1 mb-1 items-center"><User size={12}/> Tereque {g.answerTereque && <Check size={14} className="text-green-500"/>}</span>
-                                                        {g.answerTereque ? <p className="text-sm italic text-gray-700">"{g.answerTereque}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-gray-50 rounded-lg resize-none focus:ring-2 focus:ring-blue-300 outline-none" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_tereque`]:e.target.value}))} value={pendingAnswers[`${g.id}_tereque`]||''}/>}
-                                                    </div>
+                                                    <div className={`p-3 rounded-xl border ${g.answerFlor?'bg-rose-50 border-rose-100':'bg-white border-dashed border-rose-200'}`}><span className="text-xs font-bold text-rose-500 flex gap-1 mb-1 items-center"><Heart size={12}/> Flor {g.answerFlor && <Check size={14} className="text-green-500"/>}</span>{g.answerFlor ? <p className="text-sm italic text-gray-700">"{g.answerFlor}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-gray-50 rounded-lg resize-none focus:ring-2 focus:ring-rose-300 outline-none" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_flor`]:e.target.value}))} value={pendingAnswers[`${g.id}_flor`]||''}/>}</div>
+                                                    <div className={`p-3 rounded-xl border ${g.answerTereque?'bg-blue-50 border-blue-100':'bg-white border-dashed border-blue-200'}`}><span className="text-xs font-bold text-blue-500 flex gap-1 mb-1 items-center"><User size={12}/> Tereque {g.answerTereque && <Check size={14} className="text-green-500"/>}</span>{g.answerTereque ? <p className="text-sm italic text-gray-700">"{g.answerTereque}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-gray-50 rounded-lg resize-none focus:ring-2 focus:ring-blue-300 outline-none" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_tereque`]:e.target.value}))} value={pendingAnswers[`${g.id}_tereque`]||''}/>}</div>
                                                     {(!g.answerFlor || !g.answerTereque) && <button onClick={()=>handleCompletePendingGame(g)} className="w-full py-3 bg-purple-100 text-purple-700 font-bold rounded-xl mt-2 text-sm hover:bg-purple-200 transition-all">Enviar Respuesta</button>}
                                                 </div>
                                             </div>
