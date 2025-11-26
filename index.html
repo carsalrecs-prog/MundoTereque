@@ -21,23 +21,62 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
-        body { font-family: 'Nunito', sans-serif; transition: background-color 0.5s ease; -webkit-tap-highlight-color: transparent; }
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); }
+        
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            transition: background-color 0.5s ease; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        }
+
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .theme-transition { transition: all 0.5s ease; }
-        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid #e11d48; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        
+        .spinner { 
+            border: 3px solid rgba(255,255,255,0.3); 
+            border-radius: 50%; 
+            border-top: 3px solid #e11d48; 
+            width: 20px; 
+            height: 20px; 
+            animation: spin 1s linear infinite; 
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .markdown-body p { margin-bottom: 0.8em; }
         .markdown-body strong { color: #db2777; }
+        
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         .toast-enter { animation: slideIn 0.3s ease-out forwards; }
-        .game-gradient { background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #a18cd1 100%); }
+        
+        .game-gradient { 
+            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #a18cd1 100%); 
+        }
+        
         .pending-pulse { animation: pulse-border 2s infinite; }
-        @keyframes pulse-border { 0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); } }
-        .ai-message-box { background: rgba(255, 255, 255, 0.9); border-left: 4px solid #8b5cf6; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; color: #4c1d95; }
-        /* Help Modal Styles */
-        .help-list li { margin-bottom: 8px; display: flex; gap: 8px; align-items: start; }
+        @keyframes pulse-border { 
+            0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); } 
+            70% { box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); } 
+        }
+        
+        .ai-message-box { 
+            background: rgba(255, 255, 255, 0.9); 
+            border-left: 4px solid #8b5cf6; 
+            padding: 1rem; 
+            border-radius: 0.5rem; 
+            margin-top: 1rem; 
+            color: #4c1d95; 
+        }
+        
+        /* Estilos para listas del modal de ayuda (Color oscuro para fondo claro) */
+        .help-list li { margin-bottom: 8px; display: flex; gap: 8px; align-items: start; color: #4b5563; }
     </style>
 </head>
 <body>
@@ -57,23 +96,23 @@
             appId: "1:676402129654:web:199572eb9981cd10741ad7"
         };
 
-        // Usamos el modelo 1.5 Flash que es más estable para uso público
-        const GEMINI_MODEL = "gemini-1.5-flash"; 
-        const GEMINI_API_KEY = "AIzaSyCh1ETP6wY9fO-nFsfmEYBcZgAB6G9LZ9ETe"; 
+        // LISTA DE MODELOS A PROBAR (Priorizando el 2.5)
+        const GEMINI_MODELS_TO_TRY = [
+            "gemini-2.5-flash-preview-09-2025", // Opción 1: La versión 2.5 solicitada
+            "gemini-1.5-flash",                 // Opción 2: El estándar actual
+            "gemini-1.5-flash-001",             // Opción 3: Versión específica estable
+            "gemini-1.5-pro"                    // Opción 4: Versión Pro
+        ];
+        
+        const GEMINI_API_KEY = "AIzaSyCh1ETP6wY9fO-nFsfmEYBcZgAB6G9LZ9E"; 
 
         // ==========================================
         
-        // Inicialización de Firebase con Persistencia
         if (!firebase.apps.length) {
             try {
                 firebase.initializeApp(firebaseConfig);
-                // Habilitar persistencia offline (Mejora #2)
-                firebase.firestore().enablePersistence().catch(err => {
-                    console.log("Persistencia no habilitada (puede ser por múltiples pestañas abiertas):", err.code);
-                });
-            } catch (e) {
-                console.error("Error iniciando Firebase.", e);
-            }
+                firebase.firestore().enablePersistence().catch(err => console.log("Persistencia:", err.code));
+            } catch (e) { console.error("Error Firebase", e); }
         }
 
         const auth = firebase.auth();
@@ -111,7 +150,6 @@
             return (<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 fade-in p-4"><div className="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full"><h3 className="text-xl font-bold text-gray-800 mb-4">¿Estás seguro?</h3><p className="text-gray-600 mb-6">{message}</p><div className="flex gap-3 justify-end"><button onClick={onClose} className="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-bold transition-colors">Cancelar</button><button onClick={onConfirm} className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-bold shadow-lg transition-colors">Sí, confirmar</button></div></div></div>);
         };
 
-        // --- NUEVO COMPONENTE DE AYUDA ---
         const HelpModal = ({ isOpen, onClose }) => {
             if (!isOpen) return null;
             return (
@@ -130,7 +168,7 @@
                                     <li>Usa el <strong>Oráculo</strong> para preguntarle cosas a la IA sobre esa persona.</li>
                                 </ul>
                             </div>
-                            <hr/>
+                            <hr className="border-gray-200"/>
                             <div>
                                 <h4 className="font-bold text-purple-600 flex items-center gap-2"><Dice size={18}/> Modo Juego</h4>
                                 <p className="text-sm">Para divertirse y conocerse mejor.</p>
@@ -140,7 +178,7 @@
                                     <li>Si solo uno responde, se guarda en <strong>Pendientes</strong> hasta que el otro responda su parte.</li>
                                 </ul>
                             </div>
-                            <div className="bg-blue-50 p-3 rounded-xl text-xs text-blue-700">
+                            <div className="bg-blue-50 p-3 rounded-xl text-xs text-blue-700 border border-blue-100">
                                 💡 <strong>Tip:</strong> Puedes descargar toda la info en Excel usando el botón <Download size={10} className="inline"/> arriba a la derecha.
                             </div>
                         </div>
@@ -163,8 +201,7 @@
             const [editingId, setEditingId] = useState(null);
             const [toast, setToast] = useState(null);
             const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null, type: null });
-            const [helpModalOpen, setHelpModalOpen] = useState(false); // Estado ayuda
-            
+            const [helpModalOpen, setHelpModalOpen] = useState(false); 
             const [aiQuery, setAiQuery] = useState('');
             const [aiResponse, setAiResponse] = useState('');
             const [isAiThinking, setIsAiThinking] = useState(false);
@@ -221,7 +258,7 @@
 
             useEffect(() => { if (!formData.category && categories.length > 0) setFormData(prev => ({...prev, category: categories[0]})); }, [categories]);
             useEffect(() => {
-                document.body.style.backgroundColor = viewMode === 'game' ? '#f3e8ff' : (activeProfile === 'novia' ? '#fff1f2' : '#eff6ff');
+                // El fondo ya no cambia por JS, se maneja por CSS
                 setAiResponse(''); setAiQuery(''); setEditingId(null); setFormData(prev => ({ category: categories[0], question: '', answer: '' })); setGameAnalysis('');
             }, [activeProfile, viewMode]);
 
@@ -267,35 +304,69 @@
                 link.download = "wiki_amor.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
             };
 
+            // --- FUNCIÓN DE IA ROBUSTA (CON FALLBACK DE MODELOS) ---
             const fetchAI = async (prompt) => {
                 if(!GEMINI_API_KEY.startsWith("AIza")) return "⚠️ Error: API Key inválida.";
-                try {
-                    // Usamos el modelo configurado (1.5 Flash)
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
-                        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                    });
-                    const d = await res.json();
-                    return d.candidates?.[0]?.content?.parts?.[0]?.text || "La IA está descansando 😴";
-                } catch (e) { return "Error de conexión con la IA."; }
+                
+                const safetySettings = [
+                    { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" },
+                    { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" },
+                    { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" }, 
+                    { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" }
+                ];
+
+                // Intentamos conectar con los modelos uno por uno
+                for (const model of GEMINI_MODELS_TO_TRY) {
+                    try {
+                        //console.log(`Intentando conectar con modelo: ${model}...`);
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ 
+                                contents: [{ parts: [{ text: prompt }] }],
+                                safetySettings: safetySettings 
+                            })
+                        });
+                        
+                        const d = await res.json();
+                        
+                        // Si hay error, lanzamos excepción para pasar al siguiente modelo
+                        if (d.error) {
+                            //console.warn(`Modelo ${model} falló:`, d.error.message);
+                            throw new Error(d.error.message);
+                        }
+
+                        // Si llegamos aquí, ¡funciona!
+                        if (d.promptFeedback && d.promptFeedback.blockReason) return "⚠️ Respuesta bloqueada por seguridad.";
+                        return d.candidates?.[0]?.content?.parts?.[0]?.text || "La IA no respondió.";
+
+                    } catch (e) {
+                        // Continúa al siguiente modelo en el bucle
+                        continue; 
+                    }
+                }
+                
+                // Si llegamos aquí, todos los modelos fallaron
+                return "⚠️ La IA está durmiendo (Error de conexión con todos los modelos).";
             };
 
             const handleAskAI = async (e) => {
                 e.preventDefault(); if(!aiQuery.trim()) return;
                 setIsAiThinking(true);
                 const context = entries.filter(x => x.target === activeProfile).map(x => `- ${x.category}: P:${x.question} R:${x.answer}`).join("\n");
-                const resp = await fetchAI(`Experto en ${activeProfile==='novia'?'Flor':'Tereque'}. Datos: ${context}. Pregunta: ${aiQuery}. Sé breve y útil.`);
+                const resp = await fetchAI(`Eres un experto asistente de relaciones enfocado en ${activeProfile==='novia'?'Flor':'Tereque'}. Datos de la pareja: ${context}. Pregunta del usuario: ${aiQuery}. Responde de forma breve, útil y cariñosa.`);
                 setAiResponse(resp); setIsAiThinking(false);
             };
 
             const handleGenerateGameQuestion = async () => {
                 setIsGeneratingGame(true); setGameQuestion(''); setAnswerFlor(''); setAnswerTereque('');
-                const q = await fetchAI("Genera una pregunta interesante para parejas (Flor y Tereque) para conocerse mejor. Solo la pregunta.");
+                const q = await fetchAI("Genera una pregunta interesante, divertida o profunda para que una pareja (Flor y Tereque) se responda mutuamente para conocerse mejor. Solo dame la pregunta, nada más.");
                 setGameQuestion(q); setIsGeneratingGame(false);
             };
 
             const handleAnalyzeGame = async () => {
                 setIsAnalyzingGame(true);
-                const resp = await fetchAI(`Analiza: Pregunta "${gameQuestion}". Flor: "${answerFlor}". Tereque: "${answerTereque}". Breve y divertido.`);
+                const resp = await fetchAI(`Actúa como experto en relaciones. Analiza estas respuestas de pareja. Pregunta: "${gameQuestion}". Flor dijo: "${answerFlor}". Tereque dijo: "${answerTereque}". Dame una conclusión breve, divertida y romántica.`);
                 setGameAnalysis(resp); setIsAnalyzingGame(false);
             };
 
@@ -331,9 +402,11 @@
 
             const handleSkipPendingGame = (id) => setDeleteModal({ isOpen: true, id, type: 'game_skip' });
 
-            const theme = activeProfile === 'novia' ? { text: 'text-rose-600', bg: 'bg-rose-500', border: 'border-rose-400', gradient: 'from-rose-500 to-orange-400' } : { text: 'text-blue-600', bg: 'bg-blue-500', border: 'border-blue-400', gradient: 'from-blue-500 to-cyan-400' };
+            // --- TEMAS RESTAURADOS ---
+            // Volvemos a los colores originales claros
+            const theme = activeProfile === 'novia' ? { text: 'text-rose-600', bg: 'bg-rose-500', border: 'border-rose-100', iconBg: 'bg-rose-100', gradientAi: 'from-rose-500 to-orange-400' } : { text: 'text-blue-600', bg: 'bg-blue-500', border: 'border-blue-100', iconBg: 'bg-blue-100', gradientAi: 'from-blue-500 to-cyan-400' };
             
-            if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-500"><div className="spinner border-gray-400 mb-4"></div>Conectando con el amor...</div>;
+            if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-500"><div className="spinner border-rose-500 mb-4"></div>Conectando con el amor...</div>;
 
             return (
                 <div className="min-h-screen p-4 md:p-8 max-w-5xl mx-auto pb-20">
@@ -342,17 +415,17 @@
                     <HelpModal isOpen={helpModalOpen} onClose={()=>setHelpModalOpen(false)} />
                     
                     {/* HEADER */}
-                    <header className="mb-6 glass-panel p-2 rounded-3xl flex flex-wrap justify-between gap-4 sticky top-2 z-50">
+                    <header className="mb-6 glass-panel p-2 rounded-3xl flex flex-wrap justify-between gap-4 sticky top-2 z-50 shadow-lg">
                         <div className="flex gap-2 bg-gray-100 p-1 rounded-2xl items-center">
-                            <button onClick={()=>setViewMode('wiki')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='wiki'?'bg-white shadow text-gray-800':'text-gray-400'}`}><Search size={18}/> Wiki</button>
-                            <button onClick={()=>setViewMode('game')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='game'?'bg-purple-500 shadow text-white':'text-gray-400'} ${pendingGames.length>0?'pending-pulse':''}`}><Dice size={18}/> Juego {pendingGames.length>0 && <span className="bg-red-500 text-white text-xs px-1 rounded-full">{pendingGames.length}</span>}</button>
+                            <button onClick={()=>setViewMode('wiki')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='wiki'?'bg-white shadow text-gray-800':'text-gray-400 hover:text-gray-600'}`}><Search size={18}/> Wiki</button>
+                            <button onClick={()=>setViewMode('game')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='game'?'bg-purple-500 shadow text-white':'text-gray-400 hover:text-gray-600'} ${pendingGames.length>0?'pending-pulse border-2 border-purple-300':''}`}><Dice size={18}/> Juego {pendingGames.length>0 && <span className="bg-red-500 text-white text-xs px-1 rounded-full">{pendingGames.length}</span>}</button>
                             <button onClick={()=>setHelpModalOpen(true)} className="ml-2 p-2 text-gray-400 hover:text-purple-500"><Info size={20}/></button>
                         </div>
                         {viewMode==='wiki' && (
                             <div className="flex gap-2 bg-gray-100 p-1 rounded-2xl">
-                                <button onClick={()=>setActiveProfile('novia')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${activeProfile==='novia'?'bg-white text-rose-600 shadow':'text-gray-400'}`}><Heart size={16}/> Flor</button>
-                                <button onClick={()=>setActiveProfile('novio')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${activeProfile==='novio'?'bg-white text-blue-600 shadow':'text-gray-400'}`}><User size={16}/> Tereque</button>
-                                <button onClick={downloadCSV} className="bg-gray-800 text-white p-2 rounded-xl"><Download size={16}/></button>
+                                <button onClick={()=>setActiveProfile('novia')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${activeProfile==='novia'?'bg-white text-rose-600 shadow':'text-gray-400 hover:text-gray-600'}`}><Heart size={16} className={activeProfile === 'novia' ? 'fill-rose-500' : ''}/> Flor</button>
+                                <button onClick={()=>setActiveProfile('novio')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${activeProfile==='novio'?'bg-white text-blue-600 shadow':'text-gray-400 hover:text-gray-600'}`}><User size={16} className={activeProfile === 'novio' ? 'fill-blue-500' : ''}/> Tereque</button>
+                                <button onClick={downloadCSV} className="bg-gray-800 text-white p-2 rounded-xl hover:bg-gray-900"><Download size={16}/></button>
                             </div>
                         )}
                     </header>
@@ -361,20 +434,20 @@
                         <div className="fade-in max-w-3xl mx-auto space-y-8">
                             {/* GAME UI */}
                             <div className="game-gradient p-8 rounded-3xl shadow-2xl text-center text-white relative overflow-hidden">
-                                <h2 className="text-3xl font-extrabold mb-4 relative z-10">✨ Preguntas de Pareja ✨</h2>
+                                <h2 className="text-3xl font-extrabold mb-4 relative z-10 text-white drop-shadow-md">✨ Preguntas de Pareja ✨</h2>
                                 {!gameQuestion ? (
-                                    <button onClick={handleGenerateGameQuestion} disabled={isGeneratingGame} className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold shadow-lg flex items-center gap-2 mx-auto relative z-10">{isGeneratingGame?<div className="spinner border-purple-600"/>:<><Sparkles/> Nueva Pregunta</>}</button>
+                                    <button onClick={handleGenerateGameQuestion} disabled={isGeneratingGame} className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold shadow-lg flex items-center gap-2 mx-auto relative z-10 hover:scale-105 transition-transform">{isGeneratingGame?<div className="spinner border-purple-600"/>:<><Sparkles/> Nueva Pregunta</>}</button>
                                 ) : (
                                     <div className="bg-white/20 backdrop-blur-md p-6 rounded-2xl border border-white/30 relative z-10 text-left space-y-4">
-                                        <h3 className="text-2xl font-bold text-center mb-4">"{gameQuestion}"</h3>
-                                        <input value={answerFlor} onChange={e=>setAnswerFlor(e.target.value)} placeholder="Respuesta de Flor..." className="w-full p-3 rounded-xl text-gray-800 bg-white/90" />
-                                        <input value={answerTereque} onChange={e=>setAnswerTereque(e.target.value)} placeholder="Respuesta de Tereque..." className="w-full p-3 rounded-xl text-gray-800 bg-white/90" />
+                                        <h3 className="text-2xl font-bold text-center mb-4 text-white">"{gameQuestion}"</h3>
+                                        <input value={answerFlor} onChange={e=>setAnswerFlor(e.target.value)} placeholder="Respuesta de Flor..." className="w-full p-3 rounded-xl bg-white/90 text-gray-800" />
+                                        <input value={answerTereque} onChange={e=>setAnswerTereque(e.target.value)} placeholder="Respuesta de Tereque..." className="w-full p-3 rounded-xl bg-white/90 text-gray-800" />
                                         <div className="flex gap-2">
-                                            <button onClick={handleSaveActiveGame} className="flex-1 bg-purple-600 text-white font-bold py-3 rounded-xl shadow">{answerFlor&&answerTereque?'Guardar Final':'Guardar Pendiente'}</button>
-                                            <button onClick={()=>setGameQuestion('')} className="px-4 bg-white/20 text-white rounded-xl font-bold">Cancelar</button>
+                                            <button onClick={handleSaveActiveGame} className="flex-1 bg-white text-purple-600 font-bold py-3 rounded-xl shadow hover:bg-gray-100 transition-all">{answerFlor&&answerTereque?'Guardar Final':'Guardar Pendiente'}</button>
+                                            <button onClick={()=>setGameQuestion('')} className="px-4 bg-black/20 text-white rounded-xl font-bold hover:bg-black/30 transition-all">Cancelar</button>
                                         </div>
-                                        {answerFlor && answerTereque && <button onClick={handleAnalyzeGame} disabled={isAnalyzingGame} className="w-full text-white underline text-sm mt-2">{isAnalyzingGame?'Analizando...':'Opinión IA'}</button>}
-                                        {gameAnalysis && <div className="bg-purple-100 p-3 rounded-xl text-purple-800 text-sm mt-2 markdown-body" dangerouslySetInnerHTML={{__html: marked.parse(gameAnalysis)}}></div>}
+                                        {answerFlor && answerTereque && <button onClick={handleAnalyzeGame} disabled={isAnalyzingGame} className="w-full text-white underline text-sm mt-2 hover:text-purple-100 transition-all">{isAnalyzingGame?'Analizando...':'Opinión IA'}</button>}
+                                        {gameAnalysis && <div className="bg-white p-4 rounded-xl text-purple-800 text-sm mt-2 markdown-body shadow-lg" dangerouslySetInnerHTML={{__html: marked.parse(gameAnalysis)}}></div>}
                                     </div>
                                 )}
                             </div>
@@ -385,19 +458,19 @@
                                     <h3 className="text-xl font-bold text-purple-800 mb-4 flex gap-2"><Clock/> Pendientes ({pendingGames.length})</h3>
                                     <div className="space-y-4">
                                         {pendingGames.map(g => (
-                                            <div key={g.id} className="bg-white p-6 rounded-2xl shadow border-l-8 border-purple-300 relative">
-                                                <button onClick={()=>handleSkipPendingGame(g.id)} className="absolute top-4 right-4 text-gray-300 hover:text-red-400"><Trash2 size={16}/></button>
+                                            <div key={g.id} className="bg-white p-6 rounded-2xl shadow-md border-l-8 border-purple-300 relative">
+                                                <button onClick={()=>handleSkipPendingGame(g.id)} className="absolute top-4 right-4 text-gray-300 hover:text-red-400 transition-all"><Trash2 size={16}/></button>
                                                 <h4 className="font-bold text-gray-800 mb-4 pr-8">"{g.question}"</h4>
-                                                <div className="space-y-2">
+                                                <div className="space-y-3">
                                                     <div className={`p-3 rounded-xl border ${g.answerFlor?'bg-rose-50 border-rose-100':'bg-white border-dashed border-rose-200'}`}>
-                                                        <span className="text-xs font-bold text-rose-500 flex gap-1 mb-1"><Heart size={12}/> Flor {g.answerFlor && <Check size={14} className="text-green-500"/>}</span>
-                                                        {g.answerFlor ? <p className="text-sm italic">"{g.answerFlor}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-1 bg-transparent" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_flor`]:e.target.value}))} value={pendingAnswers[`${g.id}_flor`]||''}/>}
+                                                        <span className="text-xs font-bold text-rose-500 flex gap-1 mb-1 items-center"><Heart size={12}/> Flor {g.answerFlor && <Check size={14} className="text-green-500"/>}</span>
+                                                        {g.answerFlor ? <p className="text-sm italic text-gray-700">"{g.answerFlor}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-gray-50 rounded-lg resize-none focus:ring-2 focus:ring-rose-300 outline-none" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_flor`]:e.target.value}))} value={pendingAnswers[`${g.id}_flor`]||''}/>}
                                                     </div>
                                                     <div className={`p-3 rounded-xl border ${g.answerTereque?'bg-blue-50 border-blue-100':'bg-white border-dashed border-blue-200'}`}>
-                                                        <span className="text-xs font-bold text-blue-500 flex gap-1 mb-1"><User size={12}/> Tereque {g.answerTereque && <Check size={14} className="text-green-500"/>}</span>
-                                                        {g.answerTereque ? <p className="text-sm italic">"{g.answerTereque}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-1 bg-transparent" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_tereque`]:e.target.value}))} value={pendingAnswers[`${g.id}_tereque`]||''}/>}
+                                                        <span className="text-xs font-bold text-blue-500 flex gap-1 mb-1 items-center"><User size={12}/> Tereque {g.answerTereque && <Check size={14} className="text-green-500"/>}</span>
+                                                        {g.answerTereque ? <p className="text-sm italic text-gray-700">"{g.answerTereque}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-gray-50 rounded-lg resize-none focus:ring-2 focus:ring-blue-300 outline-none" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_tereque`]:e.target.value}))} value={pendingAnswers[`${g.id}_tereque`]||''}/>}
                                                     </div>
-                                                    {(!g.answerFlor || !g.answerTereque) && <button onClick={()=>handleCompletePendingGame(g)} className="w-full py-2 bg-purple-100 text-purple-700 font-bold rounded-lg mt-2 text-sm">Enviar Respuesta</button>}
+                                                    {(!g.answerFlor || !g.answerTereque) && <button onClick={()=>handleCompletePendingGame(g)} className="w-full py-3 bg-purple-100 text-purple-700 font-bold rounded-xl mt-2 text-sm hover:bg-purple-200 transition-all">Enviar Respuesta</button>}
                                                 </div>
                                             </div>
                                         ))}
@@ -413,33 +486,33 @@
                                     <h2 className={`text-xl font-bold mb-4 flex gap-2 ${theme.text}`}>{editingId?<Edit2/>:<Plus/>}{editingId?'Editar':'Nuevo'}</h2>
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div>
-                                            <div className="flex justify-between mb-1"><label className="text-xs font-bold text-gray-500">CATEGORÍA</label> {!isAddingCategory && <button type="button" onClick={()=>setIsAddingCategory(true)} className="text-xs underline text-gray-400">Nueva</button>}</div>
-                                            {isAddingCategory ? <div className="flex gap-2"><input autoFocus placeholder="Nombre..." className="flex-1 p-2 border rounded text-sm" value={newCategoryName} onChange={e=>setNewCategoryName(e.target.value)}/><button type="button" onClick={handleAddCategory} className={`p-2 rounded text-white ${theme.bg}`}><Plus/></button></div> : <select name="category" value={formData.category} onChange={handleInputChange} className="w-full p-3 border rounded-xl bg-white">{categories.map(c=><option key={c}>{c}</option>)}</select>}
+                                            <div className="flex justify-between mb-1"><label className="text-xs font-bold text-gray-500">CATEGORÍA</label> {!isAddingCategory && <button type="button" onClick={()=>setIsAddingCategory(true)} className={`text-xs underline ${theme.text} opacity-80 hover:opacity-100`}>Nueva</button>}</div>
+                                            {isAddingCategory ? <div className="flex gap-2"><input autoFocus placeholder="Nombre..." className="flex-1 p-2 border rounded text-sm" value={newCategoryName} onChange={e=>setNewCategoryName(e.target.value)}/><button type="button" onClick={handleAddCategory} className={`p-2 rounded text-white ${theme.bg} hover:opacity-90 transition-all`}><Plus/></button></div> : <select name="category" value={formData.category} onChange={handleInputChange} className="w-full p-3 border rounded-xl bg-white">{categories.map(c=><option key={c}>{c}</option>)}</select>}
                                         </div>
                                         <input name="question" value={formData.question} onChange={handleInputChange} placeholder="Pregunta..." className="w-full p-3 border rounded-xl" required />
                                         <textarea name="answer" value={formData.answer} onChange={handleInputChange} placeholder="Respuesta..." className="w-full p-3 border rounded-xl h-24 resize-none" required />
-                                        <div className="flex gap-2">{editingId && <button type="button" onClick={handleCancelEdit} className="px-4 bg-gray-200 rounded-xl font-bold">Cancelar</button>}<button type="submit" className={`flex-1 py-3 text-white font-bold rounded-xl shadow ${theme.bg}`}>{editingId?'Actualizar':'Guardar'}</button></div>
+                                        <div className="flex gap-2">{editingId && <button type="button" onClick={handleCancelEdit} className="px-4 bg-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-300 transition-all">Cancelar</button>}<button type="submit" className={`flex-1 py-3 text-white font-bold rounded-xl shadow ${theme.bg} hover:opacity-90 transition-all`}>{editingId?'Actualizar':'Guardar'}</button></div>
                                     </form>
                                 </div>
                             </div>
                             {/* WIKI LIST & ORACLE */}
                             <div className="md:col-span-8 space-y-6">
-                                <div className={`rounded-3xl p-6 text-white shadow-xl bg-gradient-to-r ${theme.gradient} relative overflow-hidden`}>
+                                <div className={`rounded-3xl p-6 text-white shadow-xl bg-gradient-to-r ${theme.gradientAi} relative overflow-hidden`}>
                                     <div className="absolute top-0 right-0 p-4 opacity-20"><Sparkles size={100}/></div>
-                                    <h2 className="text-xl font-bold mb-2 flex gap-2"><Sparkles/> Oráculo de {activeProfile==='novia'?'Flor':'Tereque'}</h2>
-                                    <form onSubmit={handleAskAI} className="relative z-10 flex gap-2"><input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} placeholder="Pregúntale algo..." className="w-full p-3 rounded-xl text-gray-800" /><button type="submit" disabled={isAiThinking} className="bg-white/20 p-3 rounded-xl font-bold backdrop-blur">{isAiThinking?<div className="spinner border-white"/>:'Ir'}</button></form>
-                                    {aiResponse && <div className="mt-4 bg-white/10 p-4 rounded-xl backdrop-blur markdown-body" dangerouslySetInnerHTML={{__html: marked.parse(aiResponse)}} />}
+                                    <h2 className="text-xl font-bold mb-2 flex gap-2 text-white"><Sparkles/> Oráculo de {activeProfile==='novia'?'Flor':'Tereque'}</h2>
+                                    <form onSubmit={handleAskAI} className="relative z-10 flex gap-2"><input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} placeholder="Pregúntale algo..." className="w-full p-3 rounded-xl text-gray-800 bg-white/90 border-none placeholder-gray-500" /><button type="submit" disabled={isAiThinking} className="bg-white/20 p-3 rounded-xl font-bold backdrop-blur-md border border-white/20 hover:bg-white/30 transition-all">{isAiThinking?<div className="spinner border-white"/>:'Ir'}</button></form>
+                                    {aiResponse && <div className="mt-4 bg-white/10 p-4 rounded-xl backdrop-blur-md markdown-body border border-white/20 text-white" dangerouslySetInnerHTML={{__html: marked.parse(aiResponse)}} />}
                                 </div>
-                                <div className="bg-white p-2 rounded-xl flex items-center border"><Search className="ml-2 text-gray-400"/><input placeholder="Buscar..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="w-full p-2 outline-none"/></div>
+                                <div className="bg-white p-2 rounded-xl flex items-center border border-gray-100 shadow-sm"><Search className="ml-2 text-gray-400"/><input placeholder="Buscar..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="w-full p-2 outline-none bg-transparent text-gray-600 placeholder-gray-400"/></div>
                                 <div className="grid gap-4">
                                     {entries.filter(e=>e.target===activeProfile && (e.question.toLowerCase().includes(searchTerm.toLowerCase()) || e.answer.toLowerCase().includes(searchTerm.toLowerCase()))).map(e => (
-                                        <div key={e.id} className={`bg-white p-6 rounded-2xl shadow border relative group ${editingId===e.id?'ring-2 ring-rose-300':''}`}>
-                                            <span className={`text-xs font-bold px-2 py-1 rounded-full bg-gray-100 text-gray-600`}>{e.category}</span>
-                                            <h3 className="font-bold text-lg mt-2">{e.question}</h3>
-                                            <p className="text-gray-600 mt-1 whitespace-pre-line">{e.answer}</p>
-                                            <div className="mt-4 flex justify-between items-center pt-4 border-t">
+                                        <div key={e.id} className={`bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-100 relative group ${editingId===e.id?'ring-2 ring-fbbf24':''}`}>
+                                            <span className={`text-xs font-bold px-2 py-1 rounded-full ${theme.iconBg} ${theme.text}`}>{e.category}</span>
+                                            <h3 className="font-bold text-lg mt-2 text-gray-800">{e.question}</h3>
+                                            <p className="text-gray-600 mt-1 whitespace-pre-line leading-relaxed">{e.answer}</p>
+                                            <div className="mt-4 flex justify-between items-center pt-4 border-t border-gray-50">
                                                 <span className="text-xs text-gray-400">{e.date}</span>
-                                                <div className="flex gap-1"><button onClick={()=>handleEdit(e)} className="p-2 hover:bg-blue-50 rounded-full text-gray-400 hover:text-blue-500"><Edit2 size={16}/></button><button onClick={()=>handleDelete(e.id)} className="p-2 hover:bg-red-50 rounded-full text-gray-400 hover:text-red-500"><Trash2 size={16}/></button></div>
+                                                <div className="flex gap-1"><button onClick={()=>handleEdit(e)} className="p-2 hover:bg-blue-50 rounded-full text-gray-300 hover:text-blue-500 transition-all"><Edit2 size={16}/></button><button onClick={()=>handleDelete(e.id)} className="p-2 hover:bg-red-50 rounded-full text-gray-300 hover:text-red-500 transition-all"><Trash2 size={16}/></button></div>
                                             </div>
                                         </div>
                                     ))}
