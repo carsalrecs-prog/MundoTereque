@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#ec4899">
-    <title>Nuestra Wiki de Amor ❤️</title>
+    <meta name="theme-color" content="#2a0a0a">
+    <title>Nuestra Velada de Jazz ❤️</title>
     <!-- React & Tailwind -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -19,73 +19,70 @@
     <!-- Markdown Renderer -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+    <!-- Fuentes Elegantes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@300;400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
-        
         body { 
             font-family: 'Nunito', sans-serif; 
-            transition: background-color 0.5s ease; 
+            transition: background 0.8s ease; /* Transición suave de color */
             -webkit-tap-highlight-color: transparent;
+            background-color: #0f0404;
+            color: #fdf2f8;
+            min-height: 100vh;
         }
 
-        .glass-panel { 
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255, 255, 255, 0.5); 
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        h1, h2, .jazz-title {
+            font-family: 'Dancing Script', cursive;
         }
-
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .theme-transition { transition: all 0.5s ease; }
         
-        .spinner { 
-            border: 3px solid rgba(255,255,255,0.3); 
-            border-radius: 50%; 
-            border-top: 3px solid #e11d48; 
-            width: 20px; 
-            height: 20px; 
-            animation: spin 1s linear infinite; 
+        h3, h4, button {
+            font-family: 'Playfair Display', serif;
         }
+
+        /* Paneles de Cristal Dinámicos */
+        .glass-panel { 
+            backdrop-filter: blur(16px); 
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.6);
+            transition: all 0.5s ease;
+        }
+
+        /* Inputs oscuros y elegantes */
+        input, textarea, select {
+            background-color: rgba(0, 0, 0, 0.4) !important;
+            border: 1px solid rgba(255, 215, 0, 0.2) !important;
+            color: #fbbf24 !important;
+        }
+        input::placeholder, textarea::placeholder { color: #9ca3af !important; }
+        
+        .fade-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; border-top: 3px solid #fbbf24; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .markdown-body p { margin-bottom: 0.8em; }
-        .markdown-body strong { color: #db2777; }
+        .markdown-body strong { color: #fbbf24; font-weight: normal; }
         
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        .toast-enter { animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         
-        .game-gradient { 
-            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 50%, #a18cd1 100%); 
-        }
-        
-        .pending-pulse { animation: pulse-border 2s infinite; }
+        .pending-pulse { animation: pulse-border 3s infinite; }
         @keyframes pulse-border { 
-            0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); } 
-            70% { box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); } 
-            100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); } 
+            0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.2); } 
+            50% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); } 
         }
         
-        .ai-message-box { 
-            background: rgba(255, 255, 255, 0.9); 
-            border-left: 4px solid #8b5cf6; 
-            padding: 1rem; 
-            border-radius: 0.5rem; 
-            margin-top: 1rem; 
-            color: #4c1d95; 
-        }
+        .celebration-card { border: 1px solid #fbbf24; box-shadow: 0 0 20px rgba(251, 191, 36, 0.2); }
         
-        .help-list li { margin-bottom: 8px; display: flex; gap: 8px; align-items: start; color: #4b5563; }
-        
-        @keyframes celebrate {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        .celebration-card { animation: celebrate 2s infinite ease-in-out; border: 2px solid #fbbf24; }
-        
-        .toggle-checkbox:checked { right: 0; border-color: #f97316; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #f97316; }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a0505; }
+        ::-webkit-scrollbar-thumb { background: #552222; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #773333; }
     </style>
 </head>
 <body>
@@ -124,52 +121,53 @@
         const { useState, useEffect } = React;
 
         // --- COMPONENTES E ICONOS ---
-        const Heart = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>;
-        const Download = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>;
-        const Trash2 = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>;
-        const Edit2 = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>;
-        const Search = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>;
-        const User = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
-        const Plus = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>;
-        const X = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>;
-        const Cloud = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17.5 19c0-3.037-2.463-5.5-5.5-5.5S6.5 15.963 6.5 19"/><path d="M4.5 19a5.5 5.5 0 1 1 3-10.16"/><path d="M19.5 19a5.5 5.5 0 1 0-3-10.16"/><line x1="1" y1="19" x2="23" y2="19"/></svg>;
-        const Sparkles = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M9 3v4"/><path d="M3 5h4"/><path d="M3 9h4"/></svg>;
-        const Check = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"/></svg>;
-        const Dice = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><circle cx="15" cy="15" r="2"></circle></svg>;
-        const AlertCircle = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>;
-        const Clock = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
-        const Info = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>;
-        const CalendarIcon = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
-        const Bell = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>;
-        const Repeat = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>;
+        const iconClass = "opacity-90"; // Color dinámico se maneja en el componente
+        const Heart = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>;
+        const Download = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>;
+        const Trash2 = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>;
+        const Edit2 = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>;
+        const Search = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>;
+        const User = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+        const Plus = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>;
+        const X = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>;
+        const Cloud = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><path d="M17.5 19c0-3.037-2.463-5.5-5.5-5.5S6.5 15.963 6.5 19"/><path d="M4.5 19a5.5 5.5 0 1 1 3-10.16"/><path d="M19.5 19a5.5 5.5 0 1 0-3-10.16"/><line x1="1" y1="19" x2="23" y2="19"/></svg>;
+        const Sparkles = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M9 3v4"/><path d="M3 5h4"/><path d="M3 9h4"/></svg>;
+        const Check = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><polyline points="20 6 9 17 4 12"/></svg>;
+        const Dice = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><circle cx="15" cy="15" r="2"></circle></svg>;
+        const AlertCircle = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>;
+        const Clock = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+        const Info = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>;
+        const CalendarIcon = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
+        const Bell = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>;
+        const Repeat = ({ size = 24, className = "" }) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconClass} ${className}`}><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>;
 
         const Toast = ({ message, type = 'success', onClose }) => {
             useEffect(() => { const timer = setTimeout(onClose, 4000); return () => clearTimeout(timer); }, [onClose]);
-            const bgClass = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'info' ? 'bg-blue-500' : 'bg-yellow-500';
+            const bgClass = type === 'success' ? 'bg-green-800/80 border-green-600' : type === 'error' ? 'bg-red-900/80 border-red-600' : type === 'info' ? 'bg-blue-900/80 border-blue-600' : 'bg-yellow-900/80 border-yellow-600';
             const icon = type === 'success' ? <Check size={18} /> : type === 'error' ? <X size={18} /> : type === 'info' ? <Bell size={18} /> : <AlertCircle size={18} />;
-            return (<div className={`fixed bottom-4 right-4 ${bgClass} text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-2 toast-enter z-[100]`}>{icon}<span className="font-bold">{message}</span></div>);
+            return (<div className={`fixed bottom-4 right-4 ${bgClass} border text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-2 toast-enter z-[100] backdrop-blur`}>{icon}<span className="font-bold">{message}</span></div>);
         };
 
         const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
             if (!isOpen) return null;
-            return (<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 fade-in p-4"><div className="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full"><h3 className="text-xl font-bold text-gray-800 mb-4">¿Estás seguro?</h3><p className="text-gray-600 mb-6">{message}</p><div className="flex gap-3 justify-end"><button onClick={onClose} className="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-bold transition-colors">Cancelar</button><button onClick={onConfirm} className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-bold shadow-lg transition-colors">Sí, confirmar</button></div></div></div>);
+            return (<div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 fade-in p-4"><div className="glass-panel p-6 rounded-2xl shadow-2xl max-w-sm w-full bg-[#1a0505]"><h3 className="text-xl font-bold text-amber-400 mb-4 jazz-title text-3xl">¿Estás seguro?</h3><p className="text-gray-300 mb-6">{message}</p><div className="flex gap-3 justify-end"><button onClick={onClose} className="px-4 py-2 rounded-lg text-gray-300 hover:bg-white/10 font-bold transition-colors">Cancelar</button><button onClick={onConfirm} className="px-4 py-2 rounded-lg bg-red-900 text-white hover:bg-red-800 font-bold shadow-lg transition-colors border border-red-700">Sí, confirmar</button></div></div></div>);
         };
 
         const HelpModal = ({ isOpen, onClose }) => {
             if (!isOpen) return null;
             return (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 fade-in p-4">
-                    <div className="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 fade-in p-4">
+                    <div className="glass-panel p-6 rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto" style={{backgroundColor: '#1a0505'}}>
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-2">📚 Guía de Uso</h3>
-                            <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={24}/></button>
+                            <h3 className="text-3xl font-bold text-amber-400 flex items-center gap-2 jazz-title">📚 Guía de Uso</h3>
+                            <button onClick={onClose} className="text-gray-400 hover:text-amber-200"><X size={24}/></button>
                         </div>
-                        <div className="space-y-4 text-gray-600 help-list">
-                            <div><h4 className="font-bold text-purple-600 flex items-center gap-2"><Search size={18}/> Modo Wiki</h4><p className="text-sm">Base de datos oficial. Guarda datos concretos (tallas, gustos).</p></div>
-                            <hr className="border-gray-200"/>
-                            <div><h4 className="font-bold text-purple-600 flex items-center gap-2"><Dice size={18}/> Modo Juego</h4><p className="text-sm">Preguntas sorpresa para conocerse mejor.</p></div>
-                            <hr className="border-gray-200"/>
-                            <div><h4 className="font-bold text-purple-600 flex items-center gap-2"><CalendarIcon size={18}/> Fechas</h4><p className="text-sm">Guarda cumpleaños y aniversarios. Usa <Repeat size={14}/> para que se repitan cada año.</p></div>
+                        <div className="space-y-4 text-gray-300 help-list">
+                            <div><h4 className="font-bold text-amber-400 flex items-center gap-2"><Search size={18}/> Modo Wiki</h4><p className="text-sm">Base de datos oficial. Guarda datos concretos (tallas, gustos).</p></div>
+                            <hr className="border-white/10"/>
+                            <div><h4 className="font-bold text-purple-400 flex items-center gap-2"><Dice size={18}/> Modo Juego</h4><p className="text-sm">Preguntas sorpresa para conocerse mejor.</p></div>
+                            <hr className="border-white/10"/>
+                            <div><h4 className="font-bold text-red-400 flex items-center gap-2"><CalendarIcon size={18}/> Fechas</h4><p className="text-sm">Guarda cumpleaños y aniversarios. Usa <Repeat size={14}/> para que se repitan cada año.</p></div>
                         </div>
                     </div>
                 </div>
@@ -179,7 +177,7 @@
         const App = () => {
             const [user, setUser] = useState(null);
             const [activeProfile, setActiveProfile] = useState('novia');
-            const [viewMode, setViewMode] = useState('wiki');
+            const [viewMode, setViewMode] = useState('wiki'); // 'wiki', 'game', 'dates'
             const [entries, setEntries] = useState([]);
             const [categories, setCategories] = useState(['Básica', 'Gustos', 'Difícil / Profunda', 'Familia', 'Historia', 'Curiosidad']);
             const [formData, setFormData] = useState({ category: '', question: '', answer: '' });
@@ -203,7 +201,6 @@
             const [gameAnalysis, setGameAnalysis] = useState('');
             const [isAnalyzingGame, setIsAnalyzingGame] = useState(false);
             
-            // Nuevos estados para Fechas
             const [datesList, setDatesList] = useState([]);
             const [newDateTitle, setNewDateTitle] = useState('');
             const [newDateValue, setNewDateValue] = useState('');
@@ -220,7 +217,6 @@
                 return auth.onAuthStateChanged((u) => setUser(u));
             }, []);
 
-            // Sincronizar Wiki
             useEffect(() => {
                 if (!user) return;
                 const wikiRef = db.collection(collectionName).doc('data').collection('wiki_entries');
@@ -230,7 +226,6 @@
                 }, (err) => { setIsLoading(false); });
             }, [user]);
 
-            // Sincronizar Juegos Pendientes
             useEffect(() => {
                 if (!user) return;
                 const pendingRef = db.collection(collectionName).doc('data').collection('pending_games');
@@ -239,7 +234,6 @@
                 });
             }, [user]);
 
-            // Sincronizar Fechas Importantes y Relacion
             useEffect(() => {
                 if (!user) return;
                 const datesRef = db.collection(collectionName).doc('data').collection('important_dates');
@@ -249,7 +243,6 @@
                     checkUpcomingDates(loadedDates); 
                 });
                 
-                // Sincronizar fecha relacion
                 const relRef = db.collection(collectionName).doc('data').collection('settings').doc('relationship');
                 const unsubRel = relRef.onSnapshot(doc => {
                     if(doc.exists) setRelationshipStart(doc.data().date);
@@ -267,10 +260,14 @@
             const showToast = (message, type = 'success') => { setToast({ message, type }); };
 
             useEffect(() => { if (!formData.category && categories.length > 0) setFormData(prev => ({...prev, category: categories[0]})); }, [categories]);
+            
+            // --- LOGICA DE COLOR ---
             useEffect(() => {
-                if(viewMode === 'game') document.body.style.backgroundColor = '#f3e8ff'; 
-                else if(viewMode === 'dates') document.body.style.backgroundColor = '#fff7ed'; 
-                else document.body.style.backgroundColor = activeProfile === 'novia' ? '#fff1f2' : '#eff6ff';
+                if(activeProfile === 'novia') {
+                    document.body.style.background = "radial-gradient(circle at 50% 0%, #500724 0%, #0f0404 70%)";
+                } else {
+                    document.body.style.background = "radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 70%)";
+                }
                 setAiResponse(''); setAiQuery(''); setEditingId(null); setFormData(prev => ({ category: categories[0], question: '', answer: '' })); setGameAnalysis('');
                 setEditingDateId(null); setNewDateTitle(''); setNewDateValue(''); setNewDateRepeats(true);
             }, [activeProfile, viewMode]);
@@ -320,7 +317,6 @@
                 link.download = "wiki_amor.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
             };
 
-            // --- IA LOGIC ---
             const fetchAI = async (prompt) => {
                 if(!GEMINI_API_KEY.startsWith("AIza")) return "⚠️ Error API Key";
                 const safetySettings = [ { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" } ];
@@ -441,27 +437,17 @@
                 }
             };
 
-            // FIX: Accurate Duration Calculation (manual calculation)
             const calculateDuration = (dateString) => {
                 if(!dateString) return {years:0, months:0, days:0};
                 const [y, m, d] = dateString.split('-').map(Number);
                 const start = new Date(y, m-1, d);
                 const now = new Date();
                 now.setHours(0,0,0,0);
-                
                 let years = now.getFullYear() - start.getFullYear();
                 let months = now.getMonth() - start.getMonth();
                 let days = now.getDate() - start.getDate();
-                
-                if (days < 0) {
-                    months--;
-                    const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-                    days += prevMonth.getDate();
-                }
-                if (months < 0) {
-                    years--;
-                    months += 12;
-                }
+                if (days < 0) { months--; days += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+                if (months < 0) { years--; months += 12; }
                 return {years, months, days};
             };
 
@@ -474,13 +460,15 @@
                     else showToast(`📅 ¡Faltan ${days} días para ${closest.title}!`, 'info');
                 }
             };
-
-            const theme = activeProfile === 'novia' ? { text: 'text-rose-600', bg: 'bg-rose-500', border: 'border-rose-100', iconBg: 'bg-rose-100', gradientAi: 'from-rose-500 to-orange-400' } : { text: 'text-blue-600', bg: 'bg-blue-500', border: 'border-blue-100', iconBg: 'bg-blue-100', gradientAi: 'from-blue-500 to-cyan-400' };
             
-            if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-500"><div className="spinner border-rose-500 mb-4"></div>Conectando con el amor...</div>;
+            if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-amber-400"><div className="spinner border-amber-400 mb-4"></div>Iniciando Velada...</div>;
 
             const duration = calculateDuration(relationshipStart);
             const daysToAnniversary = relationshipStart ? getDaysUntil({date: relationshipStart, repeats: true}) : 0;
+
+            const activeTheme = activeProfile === 'novia' 
+                ? { text: 'text-pink-400', accent: 'text-rose-500', border: 'border-pink-500/40', glass: 'rgba(50, 10, 20, 0.6)' } 
+                : { text: 'text-blue-400', accent: 'text-blue-500', border: 'border-blue-500/40', glass: 'rgba(10, 20, 50, 0.6)' };
 
             return (
                 <div className="min-h-screen p-4 md:p-8 max-w-5xl mx-auto pb-20">
@@ -488,18 +476,19 @@
                     <ConfirmationModal isOpen={deleteModal.isOpen} onClose={()=>setDeleteModal({isOpen:false})} onConfirm={confirmDelete} message={deleteModal.type==='wiki'?"¿Borrar recuerdo?":deleteModal.type==='date'?"¿Borrar fecha importante?":"¿Descartar pregunta?"} />
                     <HelpModal isOpen={helpModalOpen} onClose={()=>setHelpModalOpen(false)} />
                     
-                    <header className="mb-6 glass-panel p-2 rounded-3xl flex flex-wrap justify-between gap-4 sticky top-2 z-50 shadow-lg">
-                        <div className="flex gap-2 bg-gray-100 p-1 rounded-2xl items-center">
-                            <button onClick={()=>setViewMode('wiki')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='wiki'?'bg-white shadow text-gray-800':'text-gray-400 hover:text-gray-600'}`}><Search size={18}/> Wiki</button>
-                            <button onClick={()=>setViewMode('game')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='game'?'bg-purple-500 shadow text-white':'text-gray-400 hover:text-gray-600'} ${pendingGames.length>0?'pending-pulse border-2 border-purple-300':''}`}><Dice size={18}/> Juego {pendingGames.length>0 && <span className="bg-red-500 text-white text-xs px-1 rounded-full">{pendingGames.length}</span>}</button>
-                            <button onClick={()=>setViewMode('dates')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='dates'?'bg-yellow-500 shadow text-white':'text-gray-400 hover:text-gray-600'}`}><CalendarIcon size={18}/> Fechas</button>
-                            <button onClick={()=>setHelpModalOpen(true)} className="ml-2 p-2 text-gray-400 hover:text-purple-500"><Info size={20}/></button>
+                    {/* HEADER */}
+                    <header className="mb-6 glass-panel p-2 rounded-3xl flex flex-wrap justify-between gap-4 sticky top-2 z-50 shadow-lg" style={{backgroundColor: activeTheme.glass, borderColor: activeTheme.border}}>
+                        <div className="flex gap-2 items-center">
+                            <button onClick={()=>setViewMode('wiki')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='wiki'?'bg-white/10 shadow text-amber-400':'text-gray-400 hover:text-gray-200'}`}><Search size={18}/> Wiki</button>
+                            <button onClick={()=>setViewMode('game')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='game'?'bg-purple-600/50 shadow text-purple-200':'text-gray-400 hover:text-gray-200'} ${pendingGames.length>0?'pending-pulse border-2 border-purple-300':''}`}><Dice size={18}/> Juego {pendingGames.length>0 && <span className="bg-red-500 text-white text-xs px-1 rounded-full">{pendingGames.length}</span>}</button>
+                            <button onClick={()=>setViewMode('dates')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${viewMode==='dates'?'bg-red-900/50 shadow text-red-200':'text-gray-400 hover:text-gray-200'}`}><CalendarIcon size={18}/> Fechas</button>
+                            <button onClick={()=>setHelpModalOpen(true)} className="ml-2 p-2 text-gray-400 hover:text-amber-400"><Info size={20}/></button>
                         </div>
                         {viewMode==='wiki' && (
-                            <div className="flex gap-2 bg-gray-100 p-1 rounded-2xl">
-                                <button onClick={()=>setActiveProfile('novia')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${activeProfile==='novia'?'bg-white text-rose-600 shadow':'text-gray-400 hover:text-gray-600'}`}><Heart size={16} className={activeProfile === 'novia' ? 'fill-rose-500' : ''}/> Flor</button>
-                                <button onClick={()=>setActiveProfile('novio')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${activeProfile==='novio'?'bg-white text-blue-600 shadow':'text-gray-400 hover:text-gray-600'}`}><User size={16} className={activeProfile === 'novio' ? 'fill-blue-500' : ''}/> Tereque</button>
-                                <button onClick={downloadCSV} className="bg-gray-800 text-white p-2 rounded-xl hover:bg-gray-900"><Download size={16}/></button>
+                            <div className="flex gap-2">
+                                <button onClick={()=>setActiveProfile('novia')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${activeProfile==='novia'?'bg-white/10 text-pink-300 shadow':'text-gray-400 hover:text-gray-200'}`}><Heart size={16} className="text-pink-500"/> Flor</button>
+                                <button onClick={()=>setActiveProfile('novio')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 ${activeProfile==='novio'?'bg-white/10 text-blue-300 shadow':'text-gray-400 hover:text-gray-200'}`}><User size={16} className="text-blue-400"/> Tereque</button>
+                                <button onClick={downloadCSV} className="bg-white/10 text-amber-400 p-2 rounded-xl hover:bg-white/20"><Download size={16}/></button>
                             </div>
                         )}
                     </header>
@@ -507,115 +496,142 @@
                     {viewMode === 'dates' && (
                         <div className="fade-in max-w-3xl mx-auto space-y-8">
                             
-                            <div className="bg-white p-8 rounded-3xl shadow-xl border-t-8 border-rose-500 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 opacity-10 p-4"><Heart size={120} className="text-rose-500"/></div>
-                                <h2 className="text-3xl font-extrabold text-gray-800 mb-6 flex items-center gap-2"><Heart className="text-rose-500"/> Nuestra Historia</h2>
+                            {/* TARJETA DE HISTORIA */}
+                            <div className="glass-panel p-8 rounded-3xl shadow-xl border-t-2 border-amber-500 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 opacity-10 p-4"><Heart size={120} className="text-red-500"/></div>
+                                <h2 className="text-3xl font-extrabold text-amber-400 mb-6 flex items-center gap-2 jazz-title"><Heart className="text-red-500"/> Nuestra Historia</h2>
                                 
                                 {relationshipStart && !showDateInput ? (
                                     <div className="space-y-6 relative z-10">
                                         <div className="grid grid-cols-3 gap-4 text-center">
-                                            <div className="bg-rose-50 p-4 rounded-2xl"><p className="text-4xl font-bold text-rose-500">{duration.years}</p><p className="text-gray-500 text-xs uppercase tracking-wide">Años</p></div>
-                                            <div className="bg-rose-50 p-4 rounded-2xl"><p className="text-4xl font-bold text-rose-500">{duration.months}</p><p className="text-gray-500 text-xs uppercase tracking-wide">Meses</p></div>
-                                            <div className="bg-rose-50 p-4 rounded-2xl"><p className="text-4xl font-bold text-rose-500">{duration.days}</p><p className="text-gray-500 text-xs uppercase tracking-wide">Días</p></div>
+                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-4xl font-bold text-pink-300 jazz-title">{duration.years}</p><p className="text-sm text-gray-300 uppercase tracking-wide font-bold">Años</p></div>
+                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-4xl font-bold text-pink-300 jazz-title">{duration.months}</p><p className="text-sm text-gray-300 uppercase tracking-wide font-bold">Meses</p></div>
+                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-4xl font-bold text-pink-300 jazz-title">{duration.days}</p><p className="text-sm text-gray-300 uppercase tracking-wide font-bold">Días</p></div>
                                         </div>
-                                        <div className="bg-rose-600 text-white p-4 rounded-xl flex justify-between items-center shadow-lg">
-                                            <div><p className="text-rose-100 text-xs uppercase font-bold">Próximo Aniversario</p><p className="font-bold text-lg">Faltan {daysToAnniversary} días 🎉</p></div>
-                                            <button onClick={()=>setShowDateInput(true)} className="text-rose-200 hover:text-white"><Edit2 size={18}/></button>
+                                        <div className="bg-gradient-to-r from-red-900/80 to-pink-900/80 text-white p-4 rounded-xl flex justify-between items-center shadow-lg border border-red-800/50">
+                                            <div>
+                                                <p className="text-amber-200 text-sm uppercase font-bold">Próximo Aniversario</p>
+                                                <p className="font-bold text-lg text-pink-100">Faltan {daysToAnniversary} días 🎉</p>
+                                            </div>
+                                            <button onClick={()=>setShowDateInput(true)} className="text-pink-200 hover:text-white"><Edit2 size={18}/></button>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="text-center py-4 relative z-10">
-                                        <p className="text-gray-500 mb-4">¿Cuándo comenzó su historia?</p>
+                                        <p className="text-gray-300 mb-4">¿Cuándo comenzó su historia?</p>
                                         <div className="flex gap-2 justify-center">
-                                            <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 border rounded-xl bg-rose-50" />
-                                            <button onClick={handleSaveRelationshipDate} className="bg-rose-500 text-white px-6 rounded-xl font-bold shadow hover:bg-rose-600">Guardar Inicio</button>
+                                            <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 border rounded-xl" />
+                                            <button onClick={handleSaveRelationshipDate} className="btn-jazz px-6 py-3 rounded-xl font-bold shadow">Guardar Inicio</button>
                                             {relationshipStart && <button onClick={()=>setShowDateInput(false)} className="text-gray-400 px-3">Cancelar</button>}
                                         </div>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-8 rounded-3xl shadow-xl text-center text-white">
-                                <h2 className="text-2xl font-bold mb-4 drop-shadow-md">{editingDateId ? '✏️ Editar Fecha' : '📅 Otras Fechas Importantes'}</h2>
-                                <form onSubmit={handleSaveDate} className="flex flex-col gap-3 bg-white/20 p-4 rounded-2xl backdrop-blur-md text-left">
+                            {/* AGREGAR / EDITAR FECHA */}
+                            <div className="game-gradient p-8 rounded-3xl shadow-xl text-center text-white border border-white/10">
+                                <h2 className="text-2xl font-bold mb-4 drop-shadow-md jazz-title text-amber-300">{editingDateId ? '✏️ Editar Fecha' : '📅 Otras Fechas Importantes'}</h2>
+                                <form onSubmit={handleSaveDate} className="flex flex-col gap-3 bg-black/30 p-4 rounded-2xl backdrop-blur-md text-left border border-white/10">
                                     <div className="flex flex-col md:flex-row gap-3">
-                                        <input value={newDateTitle} onChange={e=>setNewDateTitle(e.target.value)} placeholder="Título (ej: Viaje a París)" className="flex-1 p-3 rounded-xl bg-white/90 text-gray-800 outline-none" required />
-                                        <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 rounded-xl bg-white/90 text-gray-800 outline-none" required />
+                                        <input value={newDateTitle} onChange={e=>setNewDateTitle(e.target.value)} placeholder="Título (ej: Viaje a París)" className="flex-1 p-3 rounded-xl" required />
+                                        <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 rounded-xl" required />
                                     </div>
-                                    <div className="flex items-center justify-between bg-white/10 p-2 rounded-lg">
+                                    <div className="flex items-center justify-between bg-white/5 p-2 rounded-lg">
                                         <label className="flex items-center gap-2 cursor-pointer">
-                                            <input type="checkbox" checked={newDateRepeats} onChange={e=>setNewDateRepeats(e.target.checked)} className="w-5 h-5 text-orange-500 rounded bg-white border-0" />
-                                            <span className="text-sm font-bold">Repetir cada año <span className="font-normal opacity-80">(Cumpleaños, Aniversarios)</span></span>
+                                            <input type="checkbox" checked={newDateRepeats} onChange={e=>setNewDateRepeats(e.target.checked)} className="w-5 h-5 rounded bg-transparent border-amber-500 text-amber-500 focus:ring-0" />
+                                            <span className="text-sm font-bold text-gray-300">Repetir cada año <span className="font-normal opacity-60 block text-xs">(Cumpleaños, Aniversarios)</span></span>
                                         </label>
                                         <div className="flex gap-2">
-                                            {editingDateId && <button type="button" onClick={handleCancelDateEdit} className="bg-white/30 text-white font-bold px-4 py-2 rounded-xl shadow hover:bg-white/40 transition-colors">Cancelar</button>}
-                                            <button type="submit" className="bg-white text-orange-500 font-bold px-6 py-2 rounded-xl shadow hover:bg-gray-50 transition-colors">{editingDateId ? 'Actualizar' : 'Agregar'}</button>
+                                            {editingDateId && <button type="button" onClick={handleCancelDateEdit} className="bg-white/10 text-gray-300 font-bold px-4 py-2 rounded-xl shadow hover:bg-white/20 transition-colors">Cancelar</button>}
+                                            <button type="submit" className="bg-amber-600 text-white font-bold px-6 py-2 rounded-xl shadow hover:bg-amber-500 transition-colors">{editingDateId ? 'Actualizar' : 'Agregar'}</button>
                                         </div>
                                     </div>
                                 </form>
                             </div>
 
+                            {/* LISTA DE FECHAS */}
                             <div className="grid gap-4">
                                 {datesList.sort((a,b) => getDaysUntil(a) - getDaysUntil(b)).map(date => {
                                     const daysLeft = getDaysUntil(date);
                                     const isToday = daysLeft === 0;
                                     const isPast = daysLeft < 0;
                                     const isEditing = editingDateId === date.id;
-                                    const cardClass = isEditing ? 'border-orange-500 ring-2 ring-orange-300 transform scale-105 transition-all' : isToday ? 'border-yellow-400 celebration-card' : isPast ? 'border-gray-300 opacity-70' : 'border-orange-300';
+                                    const cardClass = isEditing ? 'border-amber-500 ring-1 ring-amber-500 transform scale-[1.02] transition-all bg-black/60' : isToday ? 'border-amber-400 celebration-card bg-black/60' : isPast ? 'border-gray-700 opacity-60 bg-black/40' : 'border-gray-700 bg-black/40';
                                     return (
-                                        <div key={date.id} className={`bg-white p-6 rounded-2xl shadow-md border-l-8 relative flex items-center justify-between ${cardClass}`}>
+                                        <div key={date.id} className={`p-6 rounded-2xl shadow-md border-l-4 relative flex items-center justify-between backdrop-blur-sm ${cardClass}`}>
                                             <div>
-                                                <h3 className="font-bold text-xl text-gray-800 flex items-center gap-2">{date.title} {date.repeats !== false && <Repeat size={14} className="text-gray-400" title="Se repite anualmente"/>}</h3>
-                                                <p className="text-gray-500 text-sm flex items-center gap-2">
-                                                    <CalendarIcon size={14}/> {formatDateDisplay(date.date)} 
-                                                    {isToday ? <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-xs font-bold">¡HOY!</span> : isPast ? <span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-xs">Pasó hace {Math.abs(daysLeft)} días</span> : <span className="bg-orange-50 text-orange-600 px-2 py-0.5 rounded text-xs">Faltan {daysLeft} días</span>}
+                                                <h3 className="font-bold text-xl text-amber-100 flex items-center gap-2 jazz-title">
+                                                    {date.title}
+                                                    {date.repeats !== false && <Repeat size={14} className="text-gray-500" title="Se repite anualmente"/>}
+                                                </h3>
+                                                <p className="text-gray-400 text-sm flex items-center gap-2 mt-1">
+                                                    <CalendarIcon size={14} className="text-gray-500"/> {formatDateDisplay(date.date)} 
+                                                    {isToday ? 
+                                                        <span className="bg-amber-900/50 text-amber-300 px-2 py-0.5 rounded text-xs font-bold border border-amber-700">¡HOY!</span> : 
+                                                        isPast ? 
+                                                            <span className="bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-700">Pasó hace {Math.abs(daysLeft)} días</span> : 
+                                                            <span className="bg-blue-900/30 text-blue-300 px-2 py-0.5 rounded text-xs border border-blue-800/50">Faltan {daysLeft} días</span>
+                                                    }
                                                 </p>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                {isToday && <span className="text-4xl animate-bounce mr-2">🎉</span>}
-                                                <button onClick={()=>handleEditDate(date)} className="text-gray-300 hover:text-blue-500 p-2 rounded-full hover:bg-blue-50 transition-colors" title="Editar"><Edit2 size={18}/></button>
-                                                <button onClick={()=>handleDeleteDate(date.id)} className="text-gray-300 hover:text-red-400 p-2 rounded-full hover:bg-red-50 transition-colors" title="Eliminar"><Trash2 size={18}/></button>
+                                                {isToday && <span className="text-2xl animate-bounce mr-2">🎉</span>}
+                                                <button onClick={()=>handleEditDate(date)} className="text-gray-500 hover:text-blue-400 p-2 rounded-full hover:bg-white/5 transition-colors" title="Editar"><Edit2 size={18}/></button>
+                                                <button onClick={()=>handleDeleteDate(date.id)} className="text-gray-500 hover:text-red-400 p-2 rounded-full hover:bg-white/5 transition-colors" title="Eliminar"><Trash2 size={18}/></button>
                                             </div>
                                         </div>
                                     );
                                 })}
-                                {datesList.length === 0 && <p className="text-center text-gray-400 mt-8">No hay otras fechas guardadas.</p>}
+                                {datesList.length === 0 && <p className="text-center text-gray-500 mt-8 font-serif italic">No hay fechas guardadas aún.</p>}
                             </div>
                         </div>
                     )}
 
                     {viewMode === 'game' && (
                         <div className="fade-in max-w-3xl mx-auto space-y-8">
-                            <div className="game-gradient p-8 rounded-3xl shadow-2xl text-center text-white relative overflow-hidden">
-                                <h2 className="text-3xl font-extrabold mb-4 relative z-10 text-white drop-shadow-md">✨ Preguntas de Pareja ✨</h2>
+                            <div className="game-gradient p-8 rounded-3xl shadow-2xl text-center text-white relative overflow-hidden border border-white/10">
+                                <h2 className="text-3xl font-extrabold mb-4 relative z-10 text-amber-200 drop-shadow-md jazz-title">✨ Preguntas de Pareja ✨</h2>
                                 {!gameQuestion ? (
-                                    <button onClick={handleGenerateGameQuestion} disabled={isGeneratingGame} className="bg-white text-purple-600 px-8 py-4 rounded-full font-bold shadow-lg flex items-center gap-2 mx-auto relative z-10 hover:scale-105 transition-transform">{isGeneratingGame?<div className="spinner border-purple-600"/>:<><Sparkles/> Nueva Pregunta</>}</button>
+                                    <button onClick={handleGenerateGameQuestion} disabled={isGeneratingGame} className="bg-white/10 text-amber-200 px-8 py-4 rounded-full font-bold shadow-lg flex items-center gap-2 mx-auto relative z-10 backdrop-blur-md border border-amber-500/30 hover:bg-white/20 transition-all hover:scale-105">{isGeneratingGame?<div className="spinner border-amber-500"/>:<><Sparkles/> Nueva Pregunta</>}</button>
                                 ) : (
-                                    <div className="bg-white/20 backdrop-blur-md p-6 rounded-2xl border border-white/30 relative z-10 text-left space-y-4">
-                                        <h3 className="text-2xl font-bold text-center mb-4 text-white">"{gameQuestion}"</h3>
-                                        <input value={answerFlor} onChange={e=>setAnswerFlor(e.target.value)} placeholder="Respuesta de Flor..." className="w-full p-3 rounded-xl bg-white/90 text-gray-800" />
-                                        <input value={answerTereque} onChange={e=>setAnswerTereque(e.target.value)} placeholder="Respuesta de Tereque..." className="w-full p-3 rounded-xl bg-white/90 text-gray-800" />
-                                        <div className="flex gap-2">
-                                            <button onClick={handleSaveActiveGame} className="flex-1 bg-white text-purple-600 font-bold py-3 rounded-xl shadow hover:bg-gray-100 transition-all">{answerFlor&&answerTereque?'Guardar Final':'Guardar Pendiente'}</button>
-                                            <button onClick={()=>setGameQuestion('')} className="px-4 bg-black/20 text-white rounded-xl font-bold hover:bg-black/30 transition-all">Cancelar</button>
+                                    <div className="bg-black/40 backdrop-blur-md p-6 rounded-2xl border border-white/10 relative z-10 text-left space-y-4">
+                                        <h3 className="text-2xl font-bold text-center mb-6 text-amber-100 jazz-title">"{gameQuestion}"</h3>
+                                        <div className="bg-pink-900/20 p-3 rounded-xl border border-pink-900/30">
+                                            <p className="text-sm text-pink-400 font-bold mb-1 ml-1">Respuesta de Flor</p>
+                                            <input value={answerFlor} onChange={e=>setAnswerFlor(e.target.value)} placeholder="Escribe aquí..." className="w-full p-3 rounded-xl" />
                                         </div>
-                                        {answerFlor && answerTereque && <button onClick={handleAnalyzeGame} disabled={isAnalyzingGame} className="w-full text-white underline text-sm mt-2 hover:text-purple-100 transition-all">{isAnalyzingGame?'Analizando...':'Opinión IA'}</button>}
-                                        {gameAnalysis && <div className="bg-white p-4 rounded-xl text-purple-800 text-sm mt-2 markdown-body shadow-lg" dangerouslySetInnerHTML={{__html: marked.parse(gameAnalysis)}}></div>}
+                                        <div className="bg-blue-900/20 p-3 rounded-xl border border-blue-900/30">
+                                            <p className="text-sm text-blue-400 font-bold mb-1 ml-1">Respuesta de Tereque</p>
+                                            <input value={answerTereque} onChange={e=>setAnswerTereque(e.target.value)} placeholder="Escribe aquí..." className="w-full p-3 rounded-xl" />
+                                        </div>
+                                        <div className="flex gap-2 pt-2">
+                                            <button onClick={handleSaveActiveGame} className="flex-1 btn-jazz font-bold py-3 rounded-xl shadow transition-all">{answerFlor&&answerTereque?'Guardar Final':'Guardar Pendiente'}</button>
+                                            <button onClick={()=>setGameQuestion('')} className="px-4 bg-white/10 text-gray-300 rounded-xl font-bold hover:bg-white/20 transition-all border border-white/10">Cancelar</button>
+                                        </div>
+                                        {answerFlor && answerTereque && <button onClick={handleAnalyzeGame} disabled={isAnalyzingGame} className="w-full text-amber-400 underline text-sm mt-2 hover:text-amber-200 transition-all text-center">{isAnalyzingGame?'Analizando...':'Opinión IA'}</button>}
+                                        {gameAnalysis && <div className="ai-message-box text-sm mt-4 shadow-lg" dangerouslySetInnerHTML={{__html: marked.parse(gameAnalysis)}}></div>}
                                     </div>
                                 )}
                             </div>
+                            
                             {pendingGames.length > 0 && (
                                 <div>
-                                    <h3 className="text-xl font-bold text-purple-800 mb-4 flex gap-2"><Clock/> Pendientes ({pendingGames.length})</h3>
+                                    <h3 className="text-xl font-bold text-amber-500/80 mb-4 flex gap-2 jazz-title"><Clock/> Pendientes ({pendingGames.length})</h3>
                                     <div className="space-y-4">
                                         {pendingGames.map(g => (
-                                            <div key={g.id} className="bg-white p-6 rounded-2xl shadow-md border-l-8 border-purple-300 relative">
-                                                <button onClick={()=>handleSkipPendingGame(g.id)} className="absolute top-4 right-4 text-gray-300 hover:text-red-400 transition-all"><Trash2 size={16}/></button>
-                                                <h4 className="font-bold text-gray-800 mb-4 pr-8">"{g.question}"</h4>
+                                            <div key={g.id} className="glass-panel p-6 rounded-2xl shadow-md border-l-4 border-purple-500 relative">
+                                                <button onClick={()=>handleSkipPendingGame(g.id)} className="absolute top-4 right-4 text-gray-500 hover:text-red-400 transition-all"><Trash2 size={16}/></button>
+                                                <h4 className="font-bold text-gray-200 mb-4 pr-8 jazz-title text-lg">"{g.question}"</h4>
                                                 <div className="space-y-3">
-                                                    <div className={`p-3 rounded-xl border ${g.answerFlor?'bg-rose-50 border-rose-100':'bg-white border-dashed border-rose-200'}`}><span className="text-xs font-bold text-rose-500 flex gap-1 mb-1 items-center"><Heart size={12}/> Flor {g.answerFlor && <Check size={14} className="text-green-500"/>}</span>{g.answerFlor ? <p className="text-sm italic text-gray-700">"{g.answerFlor}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-gray-50 rounded-lg resize-none focus:ring-2 focus:ring-rose-300 outline-none" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_flor`]:e.target.value}))} value={pendingAnswers[`${g.id}_flor`]||''}/>}</div>
-                                                    <div className={`p-3 rounded-xl border ${g.answerTereque?'bg-blue-50 border-blue-100':'bg-white border-dashed border-blue-200'}`}><span className="text-xs font-bold text-blue-500 flex gap-1 mb-1 items-center"><User size={12}/> Tereque {g.answerTereque && <Check size={14} className="text-green-500"/>}</span>{g.answerTereque ? <p className="text-sm italic text-gray-700">"{g.answerTereque}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-gray-50 rounded-lg resize-none focus:ring-2 focus:ring-blue-300 outline-none" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_tereque`]:e.target.value}))} value={pendingAnswers[`${g.id}_tereque`]||''}/>}</div>
-                                                    {(!g.answerFlor || !g.answerTereque) && <button onClick={()=>handleCompletePendingGame(g)} className="w-full py-3 bg-purple-100 text-purple-700 font-bold rounded-xl mt-2 text-sm hover:bg-purple-200 transition-all">Enviar Respuesta</button>}
+                                                    <div className={`p-3 rounded-xl border ${g.answerFlor?'bg-pink-900/20 border-pink-500/30':'bg-transparent border-dashed border-gray-700'}`}>
+                                                        <span className="text-sm font-bold text-pink-400 flex gap-1 mb-1 items-center"><Heart size={12}/> Flor {g.answerFlor && <Check size={14} className="text-green-400"/>}</span>
+                                                        {g.answerFlor ? <p className="text-sm italic text-gray-400">"{g.answerFlor}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-black/30 rounded-lg resize-none focus:ring-1 focus:ring-pink-500 outline-none border border-transparent focus:border-pink-500/50" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_flor`]:e.target.value}))} value={pendingAnswers[`${g.id}_flor`]||''}/>}
+                                                    </div>
+                                                    <div className={`p-3 rounded-xl border ${g.answerTereque?'bg-blue-900/20 border-blue-500/30':'bg-transparent border-dashed border-gray-700'}`}>
+                                                        <span className="text-sm font-bold text-blue-400 flex gap-1 mb-1 items-center"><User size={12}/> Tereque {g.answerTereque && <Check size={14} className="text-green-400"/>}</span>
+                                                        {g.answerTereque ? <p className="text-sm italic text-gray-400">"{g.answerTereque}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-black/30 rounded-lg resize-none focus:ring-1 focus:ring-blue-500 outline-none border border-transparent focus:border-blue-500/50" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_tereque`]:e.target.value}))} value={pendingAnswers[`${g.id}_tereque`]||''}/>}
+                                                    </div>
+                                                    {(!g.answerFlor || !g.answerTereque) && <button onClick={()=>handleCompletePendingGame(g)} className="w-full py-3 bg-purple-900/30 hover:bg-purple-900/50 text-purple-300 font-bold rounded-xl mt-2 text-sm transition-all border border-purple-500/30">Enviar Respuesta</button>}
                                                 </div>
                                             </div>
                                         ))}
@@ -627,37 +643,39 @@
 
                     {viewMode === 'wiki' && (
                         <div className="grid md:grid-cols-12 gap-6 fade-in">
+                            {/* WIKI FORM */}
                             <div className="md:col-span-4">
-                                <div className={`glass-panel p-6 rounded-3xl sticky top-28 border-t-4 ${theme.border}`}>
-                                    <h2 className={`text-xl font-bold mb-4 flex gap-2 ${theme.text}`}>{editingId?<Edit2/>:<Plus/>}{editingId?'Editar':'Nuevo'}</h2>
+                                <div className={`glass-panel p-6 rounded-3xl sticky top-28 border-t-4 border-amber-600`}>
+                                    <h2 className={`text-xl font-bold mb-4 flex gap-2 text-amber-100 jazz-title`}>{editingId?<Edit2/>:<Plus/>}{editingId?'Editar Recuerdo':'Nuevo Recuerdo'}</h2>
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div>
-                                            <div className="flex justify-between mb-1"><label className="text-xs font-bold text-gray-500">CATEGORÍA</label> {!isAddingCategory && <button type="button" onClick={()=>setIsAddingCategory(true)} className={`text-xs underline ${theme.text} opacity-80 hover:opacity-100`}>Nueva</button>}</div>
-                                            {isAddingCategory ? <div className="flex gap-2"><input autoFocus placeholder="Nombre..." className="flex-1 p-2 border rounded text-sm" value={newCategoryName} onChange={e=>setNewCategoryName(e.target.value)}/><button type="button" onClick={handleAddCategory} className={`p-2 rounded text-white ${theme.bg} hover:opacity-90 transition-all`}><Plus/></button></div> : <select name="category" value={formData.category} onChange={handleInputChange} className="w-full p-3 border rounded-xl bg-white">{categories.map(c=><option key={c}>{c}</option>)}</select>}
+                                            <div className="flex justify-between mb-1"><label className="text-sm font-bold text-gray-400">CATEGORÍA</label> {!isAddingCategory && <button type="button" onClick={()=>setIsAddingCategory(true)} className={`text-xs underline text-amber-500/80 hover:text-amber-400`}>Nueva</button>}</div>
+                                            {isAddingCategory ? <div className="flex gap-2"><input autoFocus placeholder="Nombre..." className="flex-1 p-2 border rounded text-sm" value={newCategoryName} onChange={e=>setNewCategoryName(e.target.value)}/><button type="button" onClick={handleAddCategory} className={`p-2 rounded text-white btn-gold hover:opacity-90 transition-all`}><Plus/></button></div> : <select name="category" value={formData.category} onChange={handleInputChange} className="w-full p-3 border rounded-xl">{categories.map(c=><option key={c}>{c}</option>)}</select>}
                                         </div>
                                         <input name="question" value={formData.question} onChange={handleInputChange} placeholder="Pregunta..." className="w-full p-3 border rounded-xl" required />
                                         <textarea name="answer" value={formData.answer} onChange={handleInputChange} placeholder="Respuesta..." className="w-full p-3 border rounded-xl h-24 resize-none" required />
-                                        <div className="flex gap-2">{editingId && <button type="button" onClick={handleCancelEdit} className="px-4 bg-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-300 transition-all">Cancelar</button>}<button type="submit" className={`flex-1 py-3 text-white font-bold rounded-xl shadow ${theme.bg} hover:opacity-90 transition-all`}>{editingId?'Actualizar':'Guardar'}</button></div>
+                                        <div className="flex gap-2">{editingId && <button type="button" onClick={handleCancelEdit} className="px-4 bg-white/10 text-gray-300 rounded-xl font-bold hover:bg-white/20 transition-all border border-white/10">Cancelar</button>}<button type="submit" className={`flex-1 py-3 text-white font-bold rounded-xl shadow btn-jazz transition-all`}>{editingId?'Actualizar':'Guardar'}</button></div>
                                     </form>
                                 </div>
                             </div>
+                            {/* WIKI LIST & ORACLE */}
                             <div className="md:col-span-8 space-y-6">
-                                <div className={`rounded-3xl p-6 text-white shadow-xl bg-gradient-to-r ${theme.gradientAi} relative overflow-hidden`}>
+                                <div className={`rounded-3xl p-6 text-white shadow-xl game-gradient relative overflow-hidden border border-white/10`}>
                                     <div className="absolute top-0 right-0 p-4 opacity-20"><Sparkles size={100}/></div>
-                                    <h2 className="text-xl font-bold mb-2 flex gap-2 text-white"><Sparkles/> Oráculo de {activeProfile==='novia'?'Flor':'Tereque'}</h2>
-                                    <form onSubmit={handleAskAI} className="relative z-10 flex gap-2"><input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} placeholder="Pregúntale algo..." className="w-full p-3 rounded-xl text-gray-800 bg-white/90 border-none placeholder-gray-500" /><button type="submit" disabled={isAiThinking} className="bg-white/20 p-3 rounded-xl font-bold backdrop-blur-md border border-white/20 hover:bg-white/30 transition-all">{isAiThinking?<div className="spinner border-white"/>:'Ir'}</button></form>
-                                    {aiResponse && <div className="mt-4 bg-white/10 p-4 rounded-xl backdrop-blur-md markdown-body border border-white/20 text-white" dangerouslySetInnerHTML={{__html: marked.parse(aiResponse)}} />}
+                                    <h2 className="text-xl font-bold mb-2 flex gap-2 text-amber-200 jazz-title"><Sparkles/> Oráculo de {activeProfile==='novia'?'Flor':'Tereque'}</h2>
+                                    <form onSubmit={handleAskAI} className="relative z-10 flex gap-2"><input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} placeholder="Pregúntale algo..." className="w-full p-3 rounded-xl text-gray-200 bg-black/20 backdrop-blur-md border border-white/10 placeholder-gray-400" /><button type="submit" disabled={isAiThinking} className="bg-amber-600/20 p-3 rounded-xl font-bold backdrop-blur-md border border-amber-500/30 hover:bg-amber-600/30 transition-all text-amber-400">{isAiThinking?<div className="spinner border-amber-400"/>:'Ir'}</button></form>
+                                    {aiResponse && <div className="mt-4 ai-message-box text-sm leading-relaxed markdown-body shadow-lg" dangerouslySetInnerHTML={{__html: marked.parse(aiResponse)}} />}
                                 </div>
-                                <div className="bg-white p-2 rounded-xl flex items-center border border-gray-100 shadow-sm"><Search className="ml-2 text-gray-400"/><input placeholder="Buscar..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="w-full p-2 outline-none bg-transparent text-gray-600 placeholder-gray-400"/></div>
+                                <div className="glass-panel p-2 rounded-xl flex items-center border border-white/10"><Search className="ml-2 text-gray-500"/><input placeholder="Buscar..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="w-full p-2 outline-none bg-transparent text-gray-300 placeholder-gray-600"/></div>
                                 <div className="grid gap-4">
                                     {entries.filter(e=>e.target===activeProfile && (e.question.toLowerCase().includes(searchTerm.toLowerCase()) || e.answer.toLowerCase().includes(searchTerm.toLowerCase()))).map(e => (
-                                        <div key={e.id} className={`bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-100 relative group ${editingId===e.id?'ring-2 ring-fbbf24':''}`}>
-                                            <span className={`text-xs font-bold px-2 py-1 rounded-full ${theme.iconBg} ${theme.text}`}>{e.category}</span>
-                                            <h3 className="font-bold text-lg mt-2 text-gray-800">{e.question}</h3>
-                                            <p className="text-gray-600 mt-1 whitespace-pre-line leading-relaxed">{e.answer}</p>
-                                            <div className="mt-4 flex justify-between items-center pt-4 border-t border-gray-50">
-                                                <span className="text-xs text-gray-400">{e.date}</span>
-                                                <div className="flex gap-1"><button onClick={()=>handleEdit(e)} className="p-2 hover:bg-blue-50 rounded-full text-gray-300 hover:text-blue-500 transition-all"><Edit2 size={16}/></button><button onClick={()=>handleDelete(e.id)} className="p-2 hover:bg-red-50 rounded-full text-gray-300 hover:text-red-500 transition-all"><Trash2 size={16}/></button></div>
+                                        <div key={e.id} className={`glass-panel p-6 rounded-2xl shadow border border-white/5 relative group ${editingId===e.id?'ring-1 ring-amber-500':''}`} style={{backgroundColor: activeTheme.glass}}>
+                                            <span className={`text-sm font-bold px-2 py-1 rounded-full bg-white/5 text-gray-400 border border-white/10`}>{e.category}</span>
+                                            <h3 className="font-bold text-lg mt-2 text-amber-100 jazz-title text-xl">{e.question}</h3>
+                                            <p className="text-gray-400 mt-1 whitespace-pre-line leading-relaxed font-light">{e.answer}</p>
+                                            <div className="mt-4 flex justify-between items-center pt-4 border-t border-white/5">
+                                                <span className="text-sm text-gray-600">{e.date}</span>
+                                                <div className="flex gap-1"><button onClick={()=>handleEdit(e)} className="p-2 hover:bg-blue-500/10 rounded-full text-gray-500 hover:text-blue-400 transition-all"><Edit2 size={16}/></button><button onClick={()=>handleDelete(e.id)} className="p-2 hover:bg-red-500/10 rounded-full text-gray-500 hover:text-red-400 transition-all"><Trash2 size={16}/></button></div>
                                             </div>
                                         </div>
                                     ))}
