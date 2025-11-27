@@ -662,10 +662,13 @@
                             {/* WIKI FORM */}
                             <div className="md:col-span-4">
                                 <div className={`glass-panel p-6 rounded-3xl sticky top-28 border-t-4 ${theme.border}`} style={{backgroundColor: theme.glass}}>
-                                    <h2 className={`text-xl font-bold mb-6 flex gap-3 ${theme.text} items-center`}>
-                                        {editingId?<Edit2 size={20}/>:<Plus size={20}/>}
-                                        {editingId?'Editar Recuerdo':'Nuevo Recuerdo'}
-                                    </h2>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className={`text-xl font-bold flex gap-3 ${theme.text} items-center`}>
+                                            {editingId?<Edit2 size={20}/>:<Plus size={20}/>}
+                                            {editingId?'Editar Recuerdo':'Nuevo Recuerdo'}
+                                        </h2>
+                                        {isAddingCategory && <button onClick={() => setIsAddingCategory(false)} className="text-gray-400 hover:text-white transition-colors"><X size={20}/></button>}
+                                    </div>
                                     <form onSubmit={handleSubmit} className="space-y-5">
                                         <div>
                                             <div className="flex justify-between mb-2"><label className={`text-xs font-bold tracking-wider ${theme.labelColor}`}>CATEGORÍA</label> {!isAddingCategory && <button type="button" onClick={()=>setIsAddingCategory(true)} className={`text-xs underline ${theme.accent} opacity-70 hover:opacity-100`}>Nueva</button>}</div>
@@ -679,7 +682,7 @@
                             </div>
                             {/* WIKI LIST & ORACLE */}
                             <div className="md:col-span-8 space-y-6">
-                                {/* ORACULO CARD - REDISEÑADA */}
+                                {/* ORACULO CARD - REDISEÑADA AMIGABLE */}
                                 <div className={`glass-panel p-8 rounded-3xl shadow-xl relative overflow-hidden border border-white/10 flex flex-col md:flex-row items-center gap-6`}>
                                     <div className="flex-1 w-full">
                                         <h2 className={`text-2xl font-bold mb-3 flex gap-3 ${theme.accent} items-center`}><Sparkles size={24}/> Oráculo de {activeProfile==='novia'?'Flor':'Terequito'}</h2>
