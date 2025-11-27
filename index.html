@@ -147,13 +147,13 @@
             const bgClass = type === 'success' ? 'bg-green-900/80 border-green-500 text-green-100' : 
                            type === 'error' ? 'bg-red-900/80 border-red-500 text-red-100' : 
                            'bg-blue-900/80 border-blue-500 text-blue-100';
-            const icon = type === 'success' ? <Check size={18} /> : type === 'error' ? <X size={18} /> : <Info size={18} />;
+            const icon = type === 'success' ? <Check size={18} /> : type === 'error' ? <X size={18} /> : type === 'info' ? <Bell size={18} /> : <AlertCircle size={18} />;
             return (<div className={`fixed bottom-4 right-4 ${bgClass} border px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 toast-enter z-[100] backdrop-blur`}>{icon}<span className="font-bold">{message}</span></div>);
         };
 
         const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
             if (!isOpen) return null;
-            return (<div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 fade-in p-4"><div className="glass-panel p-8 rounded-3xl shadow-2xl max-w-sm w-full bg-[#0f172a]"><h3 className="text-xl font-bold text-white mb-4">¿Estás seguro?</h3><p className="text-gray-400 mb-8 text-sm">{message}</p><div className="flex gap-3 justify-end"><button onClick={onClose} className="px-5 py-2.5 rounded-xl text-gray-300 hover:bg-white/5 font-bold transition-colors text-sm">Cancelar</button><button onClick={onConfirm} className="px-5 py-2.5 rounded-xl bg-red-600 text-white hover:bg-red-700 font-bold shadow-lg transition-colors text-sm">Sí, confirmar</button></div></div></div>);
+            return (<div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 fade-in p-4"><div className="glass-panel p-8 rounded-3xl shadow-2xl max-w-sm w-full bg-[#0f172a]"><h3 className="text-xl font-bold text-white mb-4">¿Estás seguro?</h3><p className="text-gray-400 mb-8 text-sm">{message}</p><div className="flex gap-3 justify-end"><button onClick={onClose} className="px-5 py-2.5 rounded-xl text-gray-300 hover:bg-white/5 font-bold transition-colors text-sm">Cancelar</button><button onClick={onConfirm} className="px-5 py-2.5 rounded-xl bg-red-600 text-white hover:bg-red-700 font-bold shadow-lg transition-colors text-sm">Sí, confirmar</button></div></div></div>);
         };
 
         const HelpModal = ({ isOpen, onClose }) => {
@@ -203,6 +203,7 @@
             const [pendingAnswers, setPendingAnswers] = useState({});
             const [gameAnalysis, setGameAnalysis] = useState('');
             const [isAnalyzingGame, setIsAnalyzingGame] = useState(false);
+            
             const [datesList, setDatesList] = useState([]);
             const [newDateTitle, setNewDateTitle] = useState('');
             const [newDateValue, setNewDateValue] = useState('');
@@ -244,8 +245,12 @@
                     setDatesList(loadedDates);
                     checkUpcomingDates(loadedDates); 
                 });
+                
                 const relRef = db.collection(collectionName).doc('data').collection('settings').doc('relationship');
-                const unsubRel = relRef.onSnapshot(doc => { if(doc.exists) setRelationshipStart(doc.data().date); });
+                const unsubRel = relRef.onSnapshot(doc => {
+                    if(doc.exists) setRelationshipStart(doc.data().date);
+                });
+
                 return () => { unsubDates(); unsubRel(); };
             }, [user]);
 
@@ -310,7 +315,7 @@
             const downloadCSV = () => {
                 let csv = "\uFEFFDe Quién;Categoría;Pregunta;Respuesta;Fecha\n";
                 entries.filter(e => e.target === activeProfile).forEach(r => {
-                    csv += `"${r.target==='novia'?'Flor':'Tereque'}";"${r.category}";"${(r.question||'').replace(/"/g,'""')}";"${(r.answer||'').replace(/"/g,'""')}";"${r.date}"\n`;
+                    csv += `"${r.target==='novia'?'Flor':'Terequito'}";"${r.category}";"${(r.question||'').replace(/"/g,'""')}";"${(r.answer||'').replace(/"/g,'""')}";"${r.date}"\n`;
                 });
                 const link = document.createElement("a");
                 link.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
@@ -335,19 +340,19 @@
                 e.preventDefault(); if(!aiQuery.trim()) return;
                 setIsAiThinking(true);
                 const context = entries.filter(x => x.target === activeProfile).map(x => `- ${x.category}: P:${x.question} R:${x.answer}`).join("\n");
-                const resp = await fetchAI(`Experto en ${activeProfile==='novia'?'Flor':'Tereque'}. Datos: ${context}. Pregunta: ${aiQuery}. Responde breve y cariñoso.`);
+                const resp = await fetchAI(`Experto en ${activeProfile==='novia'?'Flor':'Terequito'}. Datos: ${context}. Pregunta: ${aiQuery}. Responde breve y cariñoso.`);
                 setAiResponse(resp); setIsAiThinking(false);
             };
 
             const handleGenerateGameQuestion = async () => {
                 setIsGeneratingGame(true); setGameQuestion(''); setAnswerFlor(''); setAnswerTereque('');
-                const q = await fetchAI("Genera una pregunta interesante para parejas (Flor y Tereque) para conocerse mejor. Solo la pregunta.");
+                const q = await fetchAI("Genera una pregunta interesante para parejas (Flor y Terequito) para conocerse mejor. Solo la pregunta.");
                 setGameQuestion(q); setIsGeneratingGame(false);
             };
 
             const handleAnalyzeGame = async () => {
                 setIsAnalyzingGame(true);
-                const resp = await fetchAI(`Analiza: Pregunta "${gameQuestion}". Flor: "${answerFlor}". Tereque: "${answerTereque}". Breve y divertido.`);
+                const resp = await fetchAI(`Analiza: Pregunta "${gameQuestion}". Flor: "${answerFlor}". Terequito: "${answerTereque}". Breve y divertido.`);
                 setGameAnalysis(resp); setIsAnalyzingGame(false);
             };
 
@@ -440,7 +445,7 @@
                 }
             };
             
-            if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-400"><div className="spinner border-red-500 mb-4"></div>Iniciando...</div>;
+            if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-400"><div className="spinner border-rose-500 mb-4"></div>Iniciando...</div>;
 
             const duration = calculateDuration(relationshipStart);
             const daysToAnniversary = relationshipStart ? getDaysUntil({date: relationshipStart, repeats: true}) : 0;
@@ -454,7 +459,8 @@
                     btnBg: 'bg-gradient-to-r from-rose-900 to-red-900 hover:from-rose-800 hover:to-red-800',
                     ring: 'focus:ring-rose-900',
                     glass: 'rgba(40, 10, 20, 0.7)',
-                    glow: 'shadow-rose-900/20'
+                    glow: 'shadow-rose-900/20',
+                    labelColor: 'text-rose-200'
                   } 
                 : { 
                     accent: 'text-sky-500', 
@@ -463,7 +469,8 @@
                     btnBg: 'bg-gradient-to-r from-sky-900 to-blue-900 hover:from-sky-800 hover:to-blue-800',
                     ring: 'focus:ring-sky-900',
                     glass: 'rgba(10, 20, 40, 0.7)',
-                    glow: 'shadow-sky-900/20'
+                    glow: 'shadow-sky-900/20',
+                    labelColor: 'text-sky-200'
                   };
 
             return (
@@ -483,7 +490,7 @@
                             {viewMode==='wiki' && (
                                 <div className="flex bg-black/30 p-1 rounded-xl border border-white/5">
                                     <button onClick={()=>setActiveProfile('novia')} className={`px-4 py-1.5 rounded-lg font-bold flex gap-2 text-sm transition-all ${activeProfile==='novia'?'bg-rose-900/80 text-white shadow-md':'text-gray-500 hover:text-gray-300'}`}><Heart size={14} className={activeProfile==='novia'?'fill-current':''}/> Flor</button>
-                                    <button onClick={()=>setActiveProfile('novio')} className={`px-4 py-1.5 rounded-lg font-bold flex gap-2 text-sm transition-all ${activeProfile==='novio'?'bg-sky-900/80 text-white shadow-md':'text-gray-500 hover:text-gray-300'}`}><User size={14} className={activeProfile==='novio'?'fill-current':''}/> Tereque</button>
+                                    <button onClick={()=>setActiveProfile('novio')} className={`px-4 py-1.5 rounded-lg font-bold flex gap-2 text-sm transition-all ${activeProfile==='novio'?'bg-sky-900/80 text-white shadow-md':'text-gray-500 hover:text-gray-300'}`}><User size={14} className={activeProfile==='novio'?'fill-current':''}/> Terequito</button>
                                 </div>
                             )}
                              <button onClick={()=>setHelpModalOpen(true)} className="p-2 text-gray-500 hover:text-white transition-colors"><Info size={22}/></button>
@@ -493,87 +500,94 @@
 
                     {viewMode === 'dates' && (
                         <div className="fade-in max-w-3xl mx-auto space-y-8">
-                            <div className="glass-panel p-8 rounded-3xl relative overflow-hidden border-t-4 border-rose-900">
-                                <div className="absolute top-0 right-0 opacity-5 p-4"><Heart size={150} className="text-white"/></div>
-                                <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3"><Heart className="text-rose-500 fill-rose-500"/> Nuestra Historia</h2>
+                            
+                            {/* TARJETA DE HISTORIA */}
+                            <div className="glass-panel p-8 rounded-3xl shadow-xl border-t-2 border-orange-500 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 opacity-10 p-4"><Heart size={120} className="text-red-500"/></div>
+                                <h2 className="text-3xl font-bold text-orange-200 mb-6 flex items-center gap-3"><Heart className="text-red-500"/> Nuestra Historia</h2>
+                                
                                 {relationshipStart && !showDateInput ? (
                                     <div className="space-y-6 relative z-10">
                                         <div className="grid grid-cols-3 gap-4 text-center">
-                                            <div className="bg-black/30 p-4 rounded-2xl border border-white/5"><p className="text-4xl font-bold text-rose-400">{duration.years}</p><p className="text-xs text-gray-500 uppercase tracking-widest mt-1">Años</p></div>
-                                            <div className="bg-black/30 p-4 rounded-2xl border border-white/5"><p className="text-4xl font-bold text-rose-400">{duration.months}</p><p className="text-xs text-gray-500 uppercase tracking-widest mt-1">Meses</p></div>
-                                            <div className="bg-black/30 p-4 rounded-2xl border border-white/5"><p className="text-4xl font-bold text-rose-400">{duration.days}</p><p className="text-xs text-gray-500 uppercase tracking-widest mt-1">Días</p></div>
+                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-4xl font-bold text-white">{duration.years}</p><p className="text-gray-400 text-xs uppercase tracking-wide font-bold">Años</p></div>
+                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-4xl font-bold text-white">{duration.months}</p><p className="text-gray-400 text-xs uppercase tracking-wide font-bold">Meses</p></div>
+                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-4xl font-bold text-white">{duration.days}</p><p className="text-gray-400 text-xs uppercase tracking-wide font-bold">Días</p></div>
                                         </div>
-                                        <div className="bg-gradient-to-r from-rose-900/40 to-purple-900/40 p-5 rounded-2xl flex justify-between items-center border border-white/10">
-                                            <div><p className="text-gray-400 text-xs uppercase font-bold tracking-wide mb-1">Próximo Aniversario</p><p className="font-bold text-xl text-white">Faltan {daysToAnniversary} días 🎉</p></div>
-                                            <button onClick={()=>setShowDateInput(true)} className="text-gray-400 hover:text-white p-2"><Edit2 size={20}/></button>
+                                        <div className="bg-gradient-to-r from-red-900/80 to-orange-900/80 text-white p-4 rounded-xl flex justify-between items-center shadow-lg border border-red-800/50">
+                                            <div>
+                                                <p className="text-orange-200 text-sm uppercase font-bold">Próximo Aniversario</p>
+                                                <p className="font-bold text-lg text-white">Faltan {daysToAnniversary} días 🎉</p>
+                                            </div>
+                                            <button onClick={()=>setShowDateInput(true)} className="text-orange-200 hover:text-white"><Edit2 size={18}/></button>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="text-center py-8 relative z-10">
-                                        <p className="text-gray-300 mb-6 text-lg">¿Cuándo comenzó su historia?</p>
-                                        <div className="flex gap-3 justify-center items-center">
-                                            <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 rounded-xl bg-black/50 border border-white/20 text-white" />
-                                            <button onClick={handleSaveRelationshipDate} className="bg-rose-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-600 transition-all">Guardar</button>
-                                            {relationshipStart && <button onClick={()=>setShowDateInput(false)} className="text-gray-500 hover:text-gray-300 px-3">Cancelar</button>}
+                                    <div className="text-center py-4 relative z-10">
+                                        <p className="text-gray-300 mb-4">¿Cuándo comenzó su historia?</p>
+                                        <div className="flex gap-2 justify-center">
+                                            <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 border rounded-xl" />
+                                            <button onClick={handleSaveRelationshipDate} className="bg-gradient-to-r from-orange-700 to-red-700 text-white px-6 py-3 rounded-xl font-bold shadow hover:from-orange-600 hover:to-red-600">Guardar Inicio</button>
+                                            {relationshipStart && <button onClick={()=>setShowDateInput(false)} className="text-gray-400 px-3">Cancelar</button>}
                                         </div>
                                     </div>
                                 )}
                             </div>
-                            
-                            {/* Agregar Fecha */}
-                            <div className="glass-panel p-8 rounded-3xl border-t-4 border-orange-800/50">
-                                <h2 className="text-2xl font-bold mb-6 text-orange-200/80">{editingDateId ? '✏️ Editar Fecha' : '📅 Eventos Especiales'}</h2>
-                                <form onSubmit={handleSaveDate} className="flex flex-col gap-4">
+
+                            {/* AGREGAR / EDITAR FECHA */}
+                            <div className="glass-panel p-8 rounded-3xl shadow-xl text-center text-white border-t-2 border-white/10">
+                                <h2 className="text-2xl font-bold mb-6 text-orange-200 text-left flex gap-2 items-center"><CalendarIcon/> {editingDateId ? 'Editar Fecha' : 'Eventos Especiales'}</h2>
+                                <form onSubmit={handleSaveDate} className="flex flex-col gap-4 bg-black/20 p-4 rounded-2xl text-left border border-white/5">
                                     <div className="flex flex-col md:flex-row gap-4">
-                                        <input value={newDateTitle} onChange={e=>setNewDateTitle(e.target.value)} placeholder="Título (ej: Viaje a París)" className="flex-1 p-4 rounded-xl bg-black/30 border border-white/10 text-white focus:border-orange-500/50 focus:bg-black/50 transition-all" required />
-                                        <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-4 rounded-xl bg-black/30 border border-white/10 text-white focus:border-orange-500/50 focus:bg-black/50 transition-all" required />
+                                        <input value={newDateTitle} onChange={e=>setNewDateTitle(e.target.value)} placeholder="Título (ej: Viaje a París)" className="flex-1 p-3 rounded-xl bg-black/40 border border-white/10 text-white focus:border-orange-500/50" required />
+                                        <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 rounded-xl bg-black/40 border border-white/10 text-white focus:border-orange-500/50" required />
                                     </div>
-                                    <div className="flex items-center justify-between bg-black/20 p-3 rounded-xl border border-white/5">
+                                    <div className="flex items-center justify-between bg-white/5 p-3 rounded-xl">
                                         <label className="flex items-center gap-3 cursor-pointer select-none">
-                                            <div className="relative">
-                                                <input type="checkbox" checked={newDateRepeats} onChange={e=>setNewDateRepeats(e.target.checked)} className="sr-only" />
-                                                <div className={`w-10 h-6 rounded-full transition-colors ${newDateRepeats ? 'bg-orange-700' : 'bg-gray-700'}`}></div>
-                                                <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${newDateRepeats ? 'translate-x-4' : ''}`}></div>
-                                            </div>
-                                            <span className="text-sm text-gray-300">Repetir anualmente</span>
+                                            <input type="checkbox" checked={newDateRepeats} onChange={e=>setNewDateRepeats(e.target.checked)} className="w-5 h-5 rounded bg-transparent border-orange-500 text-orange-500 focus:ring-0" />
+                                            <span className="text-sm font-bold text-gray-300">Repetir cada año <span className="font-normal opacity-60 block text-xs">(Cumpleaños, Aniversarios)</span></span>
                                         </label>
                                         <div className="flex gap-3">
                                             {editingDateId && <button type="button" onClick={handleCancelDateEdit} className="text-gray-400 hover:text-white font-bold px-4 py-2">Cancelar</button>}
-                                            <button type="submit" className="bg-orange-800 hover:bg-orange-700 text-white font-bold px-6 py-2 rounded-xl transition-all shadow-lg shadow-orange-900/20">{editingDateId ? 'Actualizar' : 'Agregar'}</button>
+                                            <button type="submit" className="bg-orange-700 hover:bg-orange-600 text-white font-bold px-6 py-2 rounded-xl shadow transition-colors">{editingDateId ? 'Actualizar' : 'Agregar'}</button>
                                         </div>
                                     </div>
                                 </form>
                             </div>
 
-                            {/* Lista de Fechas */}
+                            {/* LISTA DE FECHAS */}
                             <div className="grid gap-4">
                                 {datesList.sort((a,b) => getDaysUntil(a) - getDaysUntil(b)).map(date => {
                                     const daysLeft = getDaysUntil(date);
                                     const isToday = daysLeft === 0;
                                     const isPast = daysLeft < 0;
                                     const isEditing = editingDateId === date.id;
+                                    const cardClass = isEditing ? 'border-orange-500 ring-1 ring-orange-500 bg-orange-900/20' : isToday ? 'border-yellow-500 celebration-card bg-yellow-900/20' : isPast ? 'border-gray-700 opacity-60 bg-black/40' : 'border-white/10 bg-black/20';
                                     return (
-                                        <div key={date.id} className={`glass-panel p-6 rounded-2xl border-l-4 relative flex items-center justify-between transition-all hover:bg-white/5 ${isEditing ? 'border-orange-500 bg-orange-900/10' : isToday ? 'border-yellow-500 bg-yellow-900/10' : isPast ? 'border-gray-600 opacity-50' : 'border-orange-800/50'}`}>
+                                        <div key={date.id} className={`p-6 rounded-2xl shadow border-l-4 relative flex items-center justify-between backdrop-blur-md transition-all ${cardClass}`}>
                                             <div>
                                                 <h3 className="font-bold text-xl text-white flex items-center gap-3">
                                                     {date.title}
-                                                    {date.repeats !== false && <Repeat size={16} className="text-gray-500" title="Se repite"/>}
+                                                    {date.repeats !== false && <Repeat size={16} className="text-gray-500" title="Se repite anualmente"/>}
                                                 </h3>
-                                                <p className="text-gray-400 text-sm flex items-center gap-2 mt-2">
-                                                    <CalendarIcon size={14} className="text-gray-500"/> {formatDateDisplay(date.date)} 
-                                                    {isToday ? <span className="bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded text-xs font-bold border border-yellow-500/30">¡HOY!</span> : 
-                                                    isPast ? <span className="bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs">Pasó hace {Math.abs(daysLeft)} días</span> : 
-                                                    <span className="bg-orange-900/30 text-orange-300 px-2 py-0.5 rounded text-xs border border-orange-800/30">Faltan {daysLeft} días</span>}
+                                                <p className="text-gray-400 text-sm flex items-center gap-2 mt-1">
+                                                    <CalendarIcon size={16} className="text-gray-500"/> {formatDateDisplay(date.date)} 
+                                                    {isToday ? 
+                                                        <span className="bg-yellow-600 text-white px-2 py-0.5 rounded text-xs font-bold">¡HOY!</span> : 
+                                                        isPast ? 
+                                                            <span className="bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-700">Pasó hace {Math.abs(daysLeft)} días</span> : 
+                                                            <span className="bg-orange-900/40 text-orange-200 px-2 py-0.5 rounded text-xs border border-orange-800/50">Faltan {daysLeft} días</span>
+                                                    }
                                                 </p>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                {isToday && <span className="text-2xl animate-bounce mr-3">🎉</span>}
-                                                <button onClick={()=>handleEditDate(date)} className="text-gray-500 hover:text-blue-400 p-2 rounded-lg hover:bg-white/5 transition-all"><Edit2 size={18}/></button>
-                                                <button onClick={()=>handleDeleteDate(date.id)} className="text-gray-500 hover:text-red-400 p-2 rounded-lg hover:bg-white/5 transition-all"><Trash2 size={18}/></button>
+                                                {isToday && <span className="text-2xl animate-bounce mr-2">🎉</span>}
+                                                <button onClick={()=>handleEditDate(date)} className="text-gray-500 hover:text-blue-400 p-2 rounded-lg hover:bg-white/5 transition-all" title="Editar"><Edit2 size={18}/></button>
+                                                <button onClick={()=>handleDeleteDate(date.id)} className="text-gray-500 hover:text-red-400 p-2 rounded-lg hover:bg-white/5 transition-all" title="Eliminar"><Trash2 size={18}/></button>
                                             </div>
                                         </div>
                                     );
                                 })}
+                                {datesList.length === 0 && <p className="text-center text-gray-500 mt-8 font-italic">No hay fechas guardadas aún.</p>}
                             </div>
                         </div>
                     )}
@@ -584,7 +598,7 @@
                                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-purple-900/20 to-transparent opacity-50"></div>
                                 <h2 className="text-3xl font-bold mb-6 relative z-10 text-white drop-shadow-md">✨ Preguntas de Pareja ✨</h2>
                                 {!gameQuestion ? (
-                                    <button onClick={handleGenerateGameQuestion} disabled={isGeneratingGame} className="bg-gradient-to-r from-purple-700 to-indigo-700 text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-purple-900/30 flex items-center gap-3 mx-auto relative z-10 hover:scale-105 transition-all border border-white/10">{isGeneratingGame?<div className="spinner border-white"/>:<><Sparkles/> Nueva Pregunta Mágica</>}</button>
+                                    <button onClick={handleGenerateGameQuestion} disabled={isGeneratingGame} className="bg-white/10 text-purple-200 px-8 py-4 rounded-2xl font-bold shadow-lg flex items-center gap-3 mx-auto relative z-10 backdrop-blur-md border border-purple-500/30 hover:bg-white/20 transition-all hover:scale-105">{isGeneratingGame?<div className="spinner border-purple-400"/>:<><Sparkles/> Nueva Pregunta Mágica</>}</button>
                                 ) : (
                                     <div className="bg-black/40 backdrop-blur-md p-8 rounded-2xl border border-white/10 relative z-10 text-left space-y-6">
                                         <h3 className="text-2xl font-bold text-center mb-6 text-white leading-relaxed">"{gameQuestion}"</h3>
@@ -594,12 +608,12 @@
                                                 <textarea value={answerFlor} onChange={e=>setAnswerFlor(e.target.value)} placeholder="Escribe aquí..." className="w-full p-3 rounded-xl bg-black/30 text-white h-24 resize-none border border-white/5 focus:border-rose-500/50"></textarea>
                                             </div>
                                             <div className="bg-sky-900/10 p-4 rounded-2xl border border-sky-500/20">
-                                                <p className="text-xs text-sky-400 font-bold mb-2 uppercase tracking-wider">Respuesta de Tereque</p>
+                                                <p className="text-xs text-sky-400 font-bold mb-2 uppercase tracking-wider">Respuesta de Terequito</p>
                                                 <textarea value={answerTereque} onChange={e=>setAnswerTereque(e.target.value)} placeholder="Escribe aquí..." className="w-full p-3 rounded-xl bg-black/30 text-white h-24 resize-none border border-white/5 focus:border-sky-500/50"></textarea>
                                             </div>
                                         </div>
                                         <div className="flex gap-3 pt-2">
-                                            <button onClick={handleSaveActiveGame} className="flex-1 bg-white text-purple-900 font-bold py-3.5 rounded-xl shadow-lg hover:bg-gray-100 transition-all">{answerFlor&&answerTereque?'Guardar en Wiki':'Guardar Pendiente'}</button>
+                                            <button onClick={handleSaveActiveGame} className="flex-1 bg-purple-700 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-purple-600 transition-all">{answerFlor&&answerTereque?'Guardar en Wiki':'Guardar Pendiente'}</button>
                                             <button onClick={()=>setGameQuestion('')} className="px-6 bg-white/5 text-gray-400 rounded-xl font-bold hover:bg-white/10 hover:text-white transition-all border border-white/5">Cancelar</button>
                                         </div>
                                         {answerFlor && answerTereque && <button onClick={handleAnalyzeGame} disabled={isAnalyzingGame} className="w-full text-purple-300 hover:text-white underline text-sm mt-4 transition-colors text-center">{isAnalyzingGame?'La IA está pensando...':'🔮 ¿Qué opina la IA?'}</button>}
@@ -628,7 +642,7 @@
                                                     {/* Tereque Input */}
                                                     <div className={`p-3 rounded-xl border transition-colors ${g.answerTereque ? 'bg-sky-900/20 border-sky-500/30' : 'bg-black/20 border-white/5 border-dashed'}`}>
                                                         <div className="flex justify-between mb-2">
-                                                            <span className="text-xs font-bold text-sky-400 flex gap-2 items-center"><User size={12}/> Tereque</span>
+                                                            <span className="text-xs font-bold text-sky-400 flex gap-2 items-center"><User size={12}/> Terequito</span>
                                                             {g.answerTereque && <Check size={14} className="text-green-400"/>}
                                                         </div>
                                                         {g.answerTereque ? <p className="text-sm text-gray-300 italic">"{g.answerTereque}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-transparent text-white rounded-lg resize-none outline-none placeholder-gray-600 focus:bg-black/20" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_tereque`]:e.target.value}))} value={pendingAnswers[`${g.id}_tereque`]||''}/>}
@@ -648,36 +662,60 @@
                             {/* WIKI FORM */}
                             <div className="md:col-span-4">
                                 <div className={`glass-panel p-6 rounded-3xl sticky top-28 border-t-4 ${theme.border}`} style={{backgroundColor: theme.glass}}>
-                                    <h2 className={`text-xl font-bold mb-6 flex gap-3 ${theme.text}`}>{editingId?<Edit2/>:<Plus/>}{editingId?'Editar Recuerdo':'Nuevo Recuerdo'}</h2>
+                                    <h2 className={`text-xl font-bold mb-6 flex gap-3 ${theme.text} items-center`}>
+                                        {editingId?<Edit2 size={20}/>:<Plus size={20}/>}
+                                        {editingId?'Editar Recuerdo':'Nuevo Recuerdo'}
+                                    </h2>
                                     <form onSubmit={handleSubmit} className="space-y-5">
                                         <div>
-                                            <div className="flex justify-between mb-2"><label className="text-xs font-bold text-gray-400 tracking-wider">CATEGORÍA</label> {!isAddingCategory && <button type="button" onClick={()=>setIsAddingCategory(true)} className={`text-xs underline ${theme.accent} opacity-70 hover:opacity-100`}>Nueva</button>}</div>
+                                            <div className="flex justify-between mb-2"><label className={`text-xs font-bold tracking-wider ${theme.labelColor}`}>CATEGORÍA</label> {!isAddingCategory && <button type="button" onClick={()=>setIsAddingCategory(true)} className={`text-xs underline ${theme.accent} opacity-70 hover:opacity-100`}>Nueva</button>}</div>
                                             {isAddingCategory ? <div className="flex gap-2"><input autoFocus placeholder="Nombre..." className="flex-1 p-3 rounded-xl bg-black/20 border border-white/10 text-sm text-white" value={newCategoryName} onChange={e=>setNewCategoryName(e.target.value)}/><button type="button" onClick={handleAddCategory} className={`p-3 rounded-xl text-white ${theme.btnBg}`}><Plus size={18}/></button></div> : <select name="category" value={formData.category} onChange={handleInputChange} className="w-full p-3.5 border rounded-xl bg-black/20 border-white/10 text-white focus:border-white/30">{categories.map(c=><option key={c} value={c}>{c}</option>)}</select>}
                                         </div>
-                                        <div><label className="text-xs font-bold text-gray-400 tracking-wider mb-2 block">PREGUNTA</label><input name="question" value={formData.question} onChange={handleInputChange} placeholder="Ej: ¿Cuál es su postre favorito?" className="w-full p-3.5 border rounded-xl bg-black/20 border-white/10 text-white focus:border-white/30" required /></div>
-                                        <div><label className="text-xs font-bold text-gray-400 tracking-wider mb-2 block">RESPUESTA</label><textarea name="answer" value={formData.answer} onChange={handleInputChange} placeholder="Escribe el detalle aquí..." className="w-full p-3.5 border rounded-xl h-32 resize-none bg-black/20 border-white/10 text-white focus:border-white/30 leading-relaxed" required /></div>
+                                        <div><label className={`text-xs font-bold tracking-wider mb-2 block ${theme.labelColor}`}>PREGUNTA</label><input name="question" value={formData.question} onChange={handleInputChange} placeholder="Ej: ¿Cuál es su postre favorito?" className="w-full p-3.5 border rounded-xl bg-black/20 border-white/10 text-white focus:border-white/30" required /></div>
+                                        <div><label className={`text-xs font-bold tracking-wider mb-2 block ${theme.labelColor}`}>RESPUESTA</label><textarea name="answer" value={formData.answer} onChange={handleInputChange} placeholder="Escribe el detalle aquí..." className="w-full p-3.5 border rounded-xl h-32 resize-none bg-black/20 border-white/10 text-white focus:border-white/30 leading-relaxed" required /></div>
                                         <div className="flex gap-3 pt-2">{editingId && <button type="button" onClick={handleCancelEdit} className="px-5 bg-white/5 text-gray-400 rounded-xl font-bold hover:bg-white/10 hover:text-white transition-all border border-white/5">Cancelar</button>}<button type="submit" className={`flex-1 py-3.5 text-white font-bold rounded-xl shadow-lg ${theme.btnBg} transition-all`}>{editingId?'Actualizar':'Guardar en Wiki'}</button></div>
                                     </form>
                                 </div>
                             </div>
                             {/* WIKI LIST & ORACLE */}
                             <div className="md:col-span-8 space-y-6">
-                                <div className={`rounded-3xl p-8 text-white shadow-xl relative overflow-hidden border border-white/10 bg-gradient-to-br ${theme.gradientAi}`}>
-                                    <div className="absolute top-0 right-0 p-6 opacity-20"><Sparkles size={120}/></div>
-                                    <h2 className="text-2xl font-bold mb-4 flex gap-3 relative z-10"><Sparkles className="text-yellow-300"/> Oráculo de {activeProfile==='novia'?'Flor':'Tereque'}</h2>
-                                    <p className="text-white/70 text-sm mb-4 relative z-10 max-w-md">Pregunta lo que quieras. La IA analizará toda la base de datos para darte la mejor respuesta.</p>
-                                    <form onSubmit={handleAskAI} className="relative z-10 flex gap-3"><input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} placeholder={`Ej: ¿Qué le puedo regalar a ${activeProfile==='novia'?'Flor':'Tereque'}?`} className="w-full p-4 rounded-xl text-white bg-black/20 border border-white/10 placeholder-white/40 focus:bg-black/30 transition-all" /><button type="submit" disabled={isAiThinking} className="bg-white text-purple-900 px-6 rounded-xl font-bold shadow-lg hover:bg-gray-100 transition-all">{isAiThinking?<div className="spinner border-purple-900"/>:'Ir'}</button></form>
-                                    {aiResponse && <div className="mt-6 bg-black/20 p-5 rounded-2xl backdrop-blur-md border border-white/10 text-white text-sm leading-relaxed shadow-inner markdown-body" dangerouslySetInnerHTML={{__html: marked.parse(aiResponse)}} />}
+                                {/* ORACULO CARD - REDISEÑADA */}
+                                <div className={`glass-panel p-8 rounded-3xl shadow-xl relative overflow-hidden border border-white/10 flex flex-col md:flex-row items-center gap-6`}>
+                                    <div className="flex-1 w-full">
+                                        <h2 className={`text-2xl font-bold mb-3 flex gap-3 ${theme.accent} items-center`}><Sparkles size={24}/> Oráculo de {activeProfile==='novia'?'Flor':'Terequito'}</h2>
+                                        <p className="text-gray-400 text-sm mb-6 leading-relaxed opacity-90">Pregunta lo que quieras. La IA analizará toda la base de datos para darte la mejor respuesta.</p>
+                                        <form onSubmit={handleAskAI} className="flex gap-3 w-full">
+                                            <input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} placeholder={`Ej: ¿Qué le puedo regalar a ${activeProfile==='novia'?'Flor':'Terequito'}?`} className="flex-1 p-4 rounded-2xl text-white bg-black/30 border border-white/10 placeholder-gray-500 focus:bg-black/40 transition-all shadow-inner" />
+                                            <button type="submit" disabled={isAiThinking} className="bg-white text-gray-900 px-6 rounded-2xl font-bold shadow-lg hover:bg-gray-100 hover:scale-105 transition-all flex items-center justify-center min-w-[60px]">{isAiThinking?<div className="spinner border-gray-900"/>:'Ir'}</button>
+                                        </form>
+                                        {aiResponse && <div className="mt-6 bg-black/20 p-6 rounded-2xl backdrop-blur-md border border-white/10 text-white text-sm leading-relaxed shadow-inner markdown-body animate-in fade-in zoom-in duration-300" dangerouslySetInnerHTML={{__html: marked.parse(aiResponse)}} />}
+                                    </div>
+                                    <div className={`hidden md:flex items-center justify-center p-6 rounded-full bg-white/5 border border-white/5 ${theme.glow} animate-pulse`}>
+                                        <Sparkles size={80} className={theme.text} strokeWidth={1} />
+                                    </div>
                                 </div>
-                                <div className="glass-panel p-3 rounded-2xl flex items-center border border-white/5"><Search className="ml-3 text-gray-500"/><input placeholder="Buscar en la wiki..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="w-full p-2 pl-4 outline-none bg-transparent text-gray-200 placeholder-gray-600"/></div>
+
+                                <div className="flex items-center gap-4 mb-6">
+                                     <div className={`p-4 rounded-full glass-panel flex items-center justify-center ${theme.text}`}>
+                                        <Search size={24} />
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Buscar en la wiki..." 
+                                        value={searchTerm} 
+                                        onChange={e=>setSearchTerm(e.target.value)} 
+                                        className="flex-1 p-4 px-6 rounded-full glass-panel border border-white/10 outline-none text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-white/10 transition-all shadow-lg"
+                                    />
+                                </div>
+
                                 <div className="grid gap-4">
                                     {entries.filter(e=>e.target===activeProfile && (e.question.toLowerCase().includes(searchTerm.toLowerCase()) || e.answer.toLowerCase().includes(searchTerm.toLowerCase()) || e.category.toLowerCase().includes(searchTerm.toLowerCase()))).map(e => (
-                                        <div key={e.id} className={`glass-panel p-6 rounded-2xl shadow border border-white/5 relative group hover:bg-white/5 transition-colors ${editingId===e.id ? 'ring-1 ring-white/30' : ''}`}>
+                                        <div key={e.id} className={`glass-panel p-6 rounded-2xl shadow border border-white/5 relative group hover:bg-white/5 transition-colors ${editingId===e.id ? `ring-1 ${theme.accent}` : ''}`}>
                                             <span className={`text-xs font-bold px-3 py-1 rounded-full bg-white/5 border border-white/10 tracking-wide uppercase ${theme.text}`}>{e.category}</span>
                                             <h3 className="font-bold text-lg mt-3 text-white leading-snug">{e.question}</h3>
-                                            <p className="text-gray-400 mt-2 whitespace-pre-line leading-relaxed font-light">{e.answer}</p>
+                                            <p className="text-gray-300 mt-2 whitespace-pre-line leading-relaxed font-light">{e.answer}</p>
                                             <div className="mt-5 flex justify-between items-center pt-4 border-t border-white/5">
-                                                <span className="text-xs text-gray-600 font-mono">{e.date}</span>
+                                                <span className="text-xs text-gray-500 font-mono">{e.date}</span>
                                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity"><button onClick={()=>handleEdit(e)} className={`p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors ${theme.accentHover}`}><Edit2 size={16}/></button><button onClick={()=>handleDelete(e.id)} className="p-2 rounded-lg bg-white/5 hover:bg-red-900/30 hover:text-red-400 text-gray-500 transition-colors"><Trash2 size={16}/></button></div>
                                             </div>
                                         </div>
