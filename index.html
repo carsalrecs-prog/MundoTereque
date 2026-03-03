@@ -30,7 +30,7 @@
             background-color: #020617;
             color: #e2e8f0;
             min-height: 100vh;
-            padding-bottom: 80px; /* Espacio para el menú móvil */
+            padding-bottom: 80px;
         }
 
         /* Glassmorphism Moderno */
@@ -42,7 +42,6 @@
             box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
         }
 
-        /* Inputs profesionales */
         input, textarea, select {
             background-color: rgba(30, 41, 59, 0.5) !important; 
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -66,12 +65,10 @@
         .markdown-body p { margin-bottom: 0.8em; }
         .markdown-body img { max-width: 100%; border-radius: 12px; margin-top: 10px; }
         
-        /* Scrollbar Minimalista */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 
-        /* Celebración / Confeti */
         @keyframes celebrate {
             0% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
             50% { transform: scale(1.02); box-shadow: 0 10px 30px -5px rgba(255,255,255,0.1); }
@@ -85,11 +82,8 @@
         }
         .confetti { position: fixed; font-size: 24px; animation: fall linear infinite; z-index: 100; pointer-events: none; }
 
-        /* Fuente de Post-It */
         .font-handwriting { font-family: 'Permanent Marker', cursive; }
         .post-it-bg { background: linear-gradient(135deg, #fef08a 0%, #fde047 100%); }
-
-        /* Ocultar barra de scroll en contenedor de chips */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -99,7 +93,7 @@
 
     <script type="text/babel">
         // ==========================================
-        // ⚙️ CONFIGURACIÓN DE FIREBASE PARA GITHUB PAGES ⚙️
+        // ⚙️ CONFIGURACIÓN FIREBASE Y GEMINI ⚙️
         // ==========================================
         
         const firebaseConfig = {
@@ -112,10 +106,8 @@
             measurementId: "G-58HLHF8FTJ"
         };
 
-        // Modelos estables y recientes de Producción (Gemini 3.0 Flash y 2.5 Flash)
-        const GEMINI_MODELS_TO_TRY = [ "gemini-3.0-flash", "gemini-2.5-flash" ];
-        
-        // 👇 PEGA TU NUEVA LLAVE DE GOOGLE AI STUDIO AQUÍ 👇
+        // Estos son los modelos 100% oficiales y funcionales de Google
+        const GEMINI_MODELS_TO_TRY = [ "gemini-2.0-flash", "gemini-1.5-flash" ];
         const apiKey = "AIzaSyAlm-ghFoYOKERB2rje9_BTL8y9DRrbByQ"; 
 
         if (!firebase.apps.length) {
@@ -127,8 +119,6 @@
 
         const auth = firebase.auth();
         const db = firebase.firestore();
-        
-        // Referencia base limpia para usar en un entorno real (GitHub Pages)
         const getBaseRef = () => db;
 
         const { useState, useEffect, useRef } = React;
@@ -235,15 +225,15 @@
                                  showToast("¡Cuenta vinculada con éxito!", "success");
                             }
                         } catch(redirectError) {
-                            console.warn("Autenticación por redirección fallida.", redirectError);
+                            console.warn("Redirección ignorada (entorno local).");
                         }
                         
                         if (!auth.currentUser) {
                             await auth.signInAnonymously(); 
                         }
                     } catch (error) { 
-                        console.error("Auth Error general:", error); 
-                        showToast("Error de conexión.", 'error'); 
+                        console.error("Auth Error:", error); 
+                        showToast("Iniciando modo offline temporal.", 'info'); 
                     }
                 };
                 initAuth();
@@ -254,25 +244,24 @@
             useEffect(() => {
                 if (!user) return;
                 
-                // Usando rutas simples y directas para Producción (GitHub Pages)
                 const wikiRef = getBaseRef().collection('wiki_entries');
                 const unsubWiki = wikiRef.onSnapshot((snapshot) => {
                     const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => b.timestamp - a.timestamp);
                     setEntries(loaded);
-                }, (error) => console.error("Error fetching wiki:", error));
+                }, (error) => console.error("Error wiki:", error));
 
                 const pendingRef = getBaseRef().collection('pending_games');
                 const unsubPend = pendingRef.onSnapshot((snapshot) => {
                     const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => b.timestamp - a.timestamp);
                     setPendingGames(loaded);
-                }, (error) => console.error("Error fetching games:", error));
+                }, (error) => console.error("Error games:", error));
 
                 const datesRef = getBaseRef().collection('important_dates');
                 const unsubDates = datesRef.onSnapshot((snapshot) => {
                     const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setDatesList(loaded);
                     checkUpcomingDates(loaded); 
-                }, (error) => console.error("Error fetching dates:", error));
+                }, (error) => console.error("Error dates:", error));
                 
                 const settingsRef = getBaseRef().collection('settings');
                 const unsubRel = settingsRef.doc('relationship').onSnapshot(doc => { if(doc.exists) setRelationshipStart(doc.data().date); }, (error) => console.error(error));
@@ -349,14 +338,13 @@
 
             // --- JUEGOS Y AI ---
             const fetchAI = async (prompt) => {
-                const activeKey = apiKey; 
-                if(!activeKey) return "⚠️ Falta la API Key";
+                if(!apiKey || !apiKey.startsWith("AIza")) return "⚠️ Llave API inválida";
                 
                 let lastError = "Error desconocido";
                 
                 for (const model of GEMINI_MODELS_TO_TRY) {
                     try {
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`, { 
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, { 
                             method: 'POST', 
                             headers: {'Content-Type': 'application/json'}, 
                             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
@@ -364,15 +352,17 @@
                         const d = await res.json();
                         if (d.error) {
                             lastError = d.error.message;
-                            throw new Error(d.error.message);
+                            console.warn(`Modelo ${model} falló:`, d.error.message);
+                            continue; // Intentar el siguiente modelo
                         }
                         return d.candidates?.[0]?.content?.parts?.[0]?.text || "La IA no respondió.";
                     } catch (e) { 
-                        console.error(`Gemini API Error con ${model}:`, e);
+                        console.error(`Error de red con ${model}:`, e);
+                        lastError = e.message;
                         continue; 
                     }
                 }
-                return `⚠️ Fallo de IA: ${lastError}. (Asegúrate de generar la llave en aistudio.google.com)`;
+                return `⚠️ Fallo de IA: Todos los modelos intentados fallaron. Último error: ${lastError}`;
             };
 
             const handleAskAI = async (e) => {
@@ -387,7 +377,7 @@
 
             const handleGenerateGameQuestion = async () => {
                 setIsGeneratingGame(true); setGameQuestion(''); setAnswerFlor(''); setAnswerTereque('');
-                const q = await fetchAI("Genera una pregunta profunda, romántica o divertida para parejas (Flor y Terequito) para conocerse mejor. Solo escribe la pregunta directamente.");
+                const q = await fetchAI("Genera una sola pregunta profunda, romántica o divertida para parejas (Flor y Terequito) para conocerse mejor. Escribe únicamente la pregunta directamente, sin intros ni comillas.");
                 setGameQuestion(q); setIsGeneratingGame(false);
             };
 
@@ -500,7 +490,7 @@
                     } else if (e.code === 'auth/popup-blocked') {
                         showToast("Ventana bloqueada. Permite las ventanas emergentes en tu navegador.", "error");
                     } else if (e.code === 'auth/popup-closed-by-user') {
-                        // Silenciar error si el usuario cierra la ventana a propósito
+                        // Silenciar error
                     } else {
                         showToast("Error al vincular. Usa el botón de respaldo manual.", "error");
                     }
@@ -522,6 +512,11 @@
                 if (searchTerm && !e.question.toLowerCase().includes(searchTerm.toLowerCase()) && !e.answer.toLowerCase().includes(searchTerm.toLowerCase())) return false;
                 return true;
             });
+
+            // Función segura para parsear Markdown
+            const renderMarkdown = (text) => {
+                try { return marked.parse(text || ''); } catch(e) { return text; }
+            };
 
             if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-400"><div className="spinner border-rose-500 mb-4"></div>Conectando a tu Nube...</div>;
 
@@ -700,7 +695,7 @@
                             </div>
 
                             <div className="grid gap-4">
-                                {datesList.sort((a,b) => getDaysUntil(a) - getDaysUntil(b)).map(date => {
+                                {[...datesList].sort((a,b) => getDaysUntil(a) - getDaysUntil(b)).map(date => {
                                     const days = getDaysUntil(date);
                                     return (
                                         <div key={date.id} className={`p-5 rounded-2xl shadow border-l-4 flex items-center justify-between transition-all ${days===0 ? 'border-yellow-500 celebration-card bg-yellow-900/20' : days<0 ? 'border-gray-700 bg-black/40 opacity-60' : 'border-white/10 bg-black/20'}`}>
@@ -759,7 +754,7 @@
                                 <div>
                                     <h3 className="text-xl font-bold text-gray-400 mb-6 flex gap-2 items-center"><Clock className="text-purple-500"/> Turnos Pendientes</h3>
                                     <div className="grid gap-4">
-                                        {pendingGames.map(g => (
+                                        {[...pendingGames].map(g => (
                                             <div key={g.id} className="glass-panel p-6 rounded-2xl border-l-4 border-purple-600 relative group">
                                                 <button onClick={()=>setDeleteModal({isOpen:true, id:g.id, type:'game_skip'})} className="absolute top-4 right-4 text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100"><Trash2 size={18}/></button>
                                                 <h4 className="font-bold text-white mb-4 pr-8 text-lg">"{g.question}"</h4>
@@ -839,7 +834,7 @@
                                             <input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} placeholder={`Ej: ¿Qué le puedo regalar?`} className="flex-1 p-3 md:p-4 rounded-2xl text-white bg-black/30 border border-white/10 placeholder-gray-500 focus:bg-black/40 transition-all shadow-inner text-sm" />
                                             <button type="submit" disabled={isAiThinking} className="bg-white text-gray-900 px-4 md:px-6 rounded-2xl font-bold shadow-lg hover:bg-gray-100 hover:scale-105 transition-all flex items-center justify-center min-w-[60px]">{isAiThinking?<div className="spinner border-gray-900"/>:'Ir'}</button>
                                         </form>
-                                        {aiResponse && <div className="mt-6 bg-black/20 p-5 rounded-2xl backdrop-blur-md border border-white/10 text-white text-sm leading-relaxed shadow-inner markdown-body animate-in fade-in zoom-in duration-300" dangerouslySetInnerHTML={{__html: marked.parse(aiResponse)}} />}
+                                        {aiResponse && <div className="mt-6 bg-black/20 p-5 rounded-2xl backdrop-blur-md border border-white/10 text-white text-sm leading-relaxed shadow-inner markdown-body animate-in fade-in zoom-in duration-300" dangerouslySetInnerHTML={{__html: renderMarkdown(aiResponse)}} />}
                                     </div>
                                     <div className={`hidden md:flex items-center justify-center p-6 rounded-full bg-white/5 border border-white/5 ${theme.glow} animate-pulse`}>
                                         <Sparkles size={60} className={theme.accent} strokeWidth={1} />
@@ -868,7 +863,7 @@
                                             <h3 className="font-bold text-lg mt-3 text-white">{e.question}</h3>
                                             
                                             {/* Markdown Render */}
-                                            <div className="text-gray-300 mt-2 text-sm leading-relaxed font-light markdown-body" dangerouslySetInnerHTML={{__html: marked.parse(e.answer)}}></div>
+                                            <div className="text-gray-300 mt-2 text-sm leading-relaxed font-light markdown-body" dangerouslySetInnerHTML={{__html: renderMarkdown(e.answer)}}></div>
                                             
                                             {/* Image Render */}
                                             {e.imageUrl && (
