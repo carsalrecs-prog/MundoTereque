@@ -221,16 +221,10 @@
             useEffect(() => {
                 const initAuth = async () => {
                     try {
-                        try {
-                            const redirectResult = await auth.getRedirectResult();
-                            if (redirectResult && redirectResult.user) {
-                                 showToast("¡Cuenta vinculada con éxito!", "success");
-                            }
-                        } catch(redirectError) {
-                            console.warn("Autenticación por redirección fallida.", redirectError);
-                        }
-                        
-                        if (!auth.currentUser) {
+                        // Se eliminó getRedirectResult para evitar la pantalla blanca y el bucle infinito
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await auth.signInWithCustomToken(__initial_auth_token);
+                        } else if (!auth.currentUser) {
                             await auth.signInAnonymously(); 
                         }
                     } catch (error) { 
@@ -343,15 +337,24 @@
                 const activeKey = apiKey || "AIzaSyCh1ETP6wY9fO-nFsfmEYBcZgAB6G9LZ9E"; 
                 if(!activeKey.startsWith("AIza")) return "⚠️ Error API Key";
                 const safetySettings = [ { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" } ];
+                
+                let lastError = "Error desconocido";
+                
                 for (const model of GEMINI_MODELS_TO_TRY) {
                     try {
                         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], safetySettings: safetySettings }) });
                         const d = await res.json();
-                        if (d.error) throw new Error(d.error.message);
+                        if (d.error) {
+                            lastError = d.error.message;
+                            throw new Error(d.error.message);
+                        }
                         return d.candidates?.[0]?.content?.parts?.[0]?.text || "La IA no respondió.";
-                    } catch (e) { continue; }
+                    } catch (e) { 
+                        console.error("Gemini API Error:", e);
+                        continue; 
+                    }
                 }
-                return "⚠️ La IA está durmiendo.";
+                return `⚠️ Fallo de IA: ${lastError}. (Revisa tu API Key)`;
             };
 
             const handleGenerateGameQuestion = async () => {
@@ -449,14 +452,29 @@
             };
 
             const handleGoogleLink = async () => {
+                if (!auth.currentUser) {
+                    showToast("Espera a que cargue la aplicación primero.", "error");
+                    return;
+                }
                 try {
                     const provider = new firebase.auth.GoogleAuthProvider();
-                    await auth.currentUser.linkWithRedirect(provider);
+                    const result = await auth.currentUser.linkWithPopup(provider);
+                    if (result && result.user) {
+                        showToast("¡Cuenta vinculada con éxito!", "success");
+                        setShowSettings(false);
+                    }
                 } catch(e) {
+                    console.error("Error al vincular:", e);
                     if (e.code === 'auth/unauthorized-domain') {
-                        showToast("Dominio bloqueado: Añade este sitio en Firebase Console (Auth > Settings > Authorized domains).", "error");
+                        showToast(`Agrega el dominio en Firebase > Authentication > Settings > Authorized domains.`, "error");
+                    } else if (e.code === 'auth/credential-already-in-use') {
+                        showToast("Esta cuenta de Google ya está vinculada a otro usuario.", "error");
+                    } else if (e.code === 'auth/popup-blocked') {
+                        showToast("Ventana bloqueada. Permite las ventanas emergentes en tu navegador.", "error");
+                    } else if (e.code === 'auth/popup-closed-by-user') {
+                        // Silenciar error si el usuario cierra la ventana a propósito
                     } else {
-                        showToast("Error al iniciar vinculación. Intenta respaldo manual.", "error");
+                        showToast("Error al vincular. Usa el botón de respaldo manual.", "error");
                     }
                 }
             };
@@ -499,7 +517,7 @@
                                 </div>
                                 <div className="space-y-6">
                                     <div className="bg-white/5 p-4 rounded-xl border border-white/10 text-sm text-gray-300 leading-relaxed">
-                                        Tus datos ya están guardados en la <b>Nube</b> automáticamente. Sin embargo, como usas una cuenta de invitado, podrías perder acceso si limpias el navegador.
+                                        Tus datos ya están guardados en la <b>Nube</b> automáticamente. Sin embargo, como usas una cuenta de invitado, podrías perder acceso si limpias el navegador o cambias de dispositivo.
                                     </div>
                                     <button onClick={handleBackup} className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold transition-all shadow-lg">
                                         <Download size={20}/> Descargar Respaldo Total
@@ -509,7 +527,7 @@
                                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5"/> Vincular con Google
                                     </button>
                                     <p className="text-[10px] text-gray-500 text-center mt-2">
-                                        Nota: Para que el inicio de sesión con Google funcione, debes agregar el dominio de GitHub Pages en tu consola de Firebase (Authentication &gt; Settings &gt; Authorized domains).
+                                        Nota: Para que el inicio de sesión con Google funcione, asegúrate de que el dominio actual ({window.location.hostname || 'archivo local'}) esté agregado en Firebase Console &gt; Authentication &gt; Settings &gt; Authorized domains.
                                     </p>
                                 </div>
                             </div>
