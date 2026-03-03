@@ -112,8 +112,11 @@
             measurementId: "G-58HLHF8FTJ"
         };
 
-        const GEMINI_MODELS_TO_TRY = [ "gemini-2.5-flash-preview-09-2025", "gemini-1.5-flash", "gemini-pro" ];
-        const apiKey = "AIzaSyAlm-ghFoYOKERB2rje9_BTL8y9DRrbByQ"; 
+        // Modelos estables de Producción
+        const GEMINI_MODELS_TO_TRY = [ "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro" ];
+        
+        // 👇 PEGA TU NUEVA LLAVE DE GOOGLE AI STUDIO AQUÍ 👇
+        const apiKey = "gen-lang-client-0731823071"; 
 
         if (!firebase.apps.length) {
             try {
@@ -125,7 +128,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         
-        // Referencia base limpia para usar en un entorno real (GitHub Pages, Vercel, etc)
+        // Referencia base limpia para usar en un entorno real (GitHub Pages)
         const getBaseRef = () => db;
 
         const { useState, useEffect, useRef } = React;
@@ -236,8 +239,6 @@
                         }
                         
                         if (!auth.currentUser) {
-                            // Ignoramos el token inyectado por el entorno de Canvas, ya que da error de "custom-token-mismatch"
-                            // al intentar conectarse a tu propio proyecto (que tiene un token de autenticación distinto)
                             await auth.signInAnonymously(); 
                         }
                     } catch (error) { 
@@ -339,53 +340,53 @@
             };
 
             const handleAddCategory = async () => {
-            if(newCategoryName.trim() && !categories.includes(newCategoryName)) {
-                const newCats = [...categories, newCategoryName];
-                await getBaseRef().collection('settings').doc('categories').set({list: newCats});
-                setFormData(prev => ({...prev, category: newCategoryName})); setNewCategoryName(''); setIsAddingCategory(false);
-            }
-        };
-
-        // --- JUEGOS Y AI ---
-        const fetchAI = async (prompt) => {
-            // Se usa la clave por defecto si estás en tu GitHub Pages, o vacía si el entorno inyecta la suya
-            const activeKey = typeof __app_id !== 'undefined' ? "" : apiKey; 
-            
-            let lastError = "Error desconocido";
-            
-            for (const model of GEMINI_MODELS_TO_TRY) {
-                try {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`, { 
-                        method: 'POST', 
-                        headers: {'Content-Type': 'application/json'}, 
-                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
-                    });
-                    const d = await res.json();
-                    if (d.error) {
-                        lastError = d.error.message;
-                        throw new Error(d.error.message);
-                    }
-                    return d.candidates?.[0]?.content?.parts?.[0]?.text || "La IA no respondió.";
-                } catch (e) { 
-                    console.error(`Gemini API Error con ${model}:`, e);
-                    continue; 
+                if(newCategoryName.trim() && !categories.includes(newCategoryName)) {
+                    const newCats = [...categories, newCategoryName];
+                    await getBaseRef().collection('settings').doc('categories').set({list: newCats});
+                    setFormData(prev => ({...prev, category: newCategoryName})); setNewCategoryName(''); setIsAddingCategory(false);
                 }
-            }
-            return `⚠️ Fallo de IA: ${lastError}`;
-        };
+            };
 
-        const handleAskAI = async (e) => {
-            e.preventDefault(); 
-            if(!aiQuery.trim()) return;
-            setIsAiThinking(true);
-            const context = entries.filter(x => x.target === activeProfile).map(x => `- ${x.category}: P:${x.question} R:${x.answer}`).join("\n");
-            const resp = await fetchAI(`Eres un experto en la relación y gustos de ${activeProfile==='novia'?'Flor':'Terequito'}. Basado estrictamente en estos datos: ${context}. Responde a esta pregunta: ${aiQuery}. Sé breve, romántico y cariñoso.`);
-            setAiResponse(resp); 
-            setIsAiThinking(false);
-        };
+            // --- JUEGOS Y AI ---
+            const fetchAI = async (prompt) => {
+                const activeKey = apiKey; 
+                if(!activeKey) return "⚠️ Falta la API Key";
+                
+                let lastError = "Error desconocido";
+                
+                for (const model of GEMINI_MODELS_TO_TRY) {
+                    try {
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`, { 
+                            method: 'POST', 
+                            headers: {'Content-Type': 'application/json'}, 
+                            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) 
+                        });
+                        const d = await res.json();
+                        if (d.error) {
+                            lastError = d.error.message;
+                            throw new Error(d.error.message);
+                        }
+                        return d.candidates?.[0]?.content?.parts?.[0]?.text || "La IA no respondió.";
+                    } catch (e) { 
+                        console.error(`Gemini API Error con ${model}:`, e);
+                        continue; 
+                    }
+                }
+                return `⚠️ Fallo de IA: ${lastError}. (Asegúrate de generar la llave en aistudio.google.com)`;
+            };
 
-        const handleGenerateGameQuestion = async () => {
-            setIsGeneratingGame(true); setGameQuestion(''); setAnswerFlor(''); setAnswerTereque('');
+            const handleAskAI = async (e) => {
+                e.preventDefault(); 
+                if(!aiQuery.trim()) return;
+                setIsAiThinking(true);
+                const context = entries.filter(x => x.target === activeProfile).map(x => `- ${x.category}: P:${x.question} R:${x.answer}`).join("\n");
+                const resp = await fetchAI(`Eres un experto en la relación y gustos de ${activeProfile==='novia'?'Flor':'Terequito'}. Basado estrictamente en estos datos: ${context}. Responde a esta pregunta: ${aiQuery}. Sé breve, romántico y cariñoso.`);
+                setAiResponse(resp); 
+                setIsAiThinking(false);
+            };
+
+            const handleGenerateGameQuestion = async () => {
+                setIsGeneratingGame(true); setGameQuestion(''); setAnswerFlor(''); setAnswerTereque('');
                 const q = await fetchAI("Genera una pregunta profunda, romántica o divertida para parejas (Flor y Terequito) para conocerse mejor. Solo escribe la pregunta directamente.");
                 setGameQuestion(q); setIsGeneratingGame(false);
             };
