@@ -20,29 +20,31 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <!-- Fuente Moderna -->
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&family=Permanent+Marker&display=swap" rel="stylesheet">
 
     <style>
         body { 
             font-family: 'Nunito', sans-serif; 
             transition: background 0.8s ease, color 0.5s ease; 
             -webkit-tap-highlight-color: transparent;
-            background-color: #020617; /* Slate 950 - Muy oscuro */
+            background-color: #020617;
             color: #e2e8f0;
             min-height: 100vh;
+            padding-bottom: 80px; /* Espacio para el menú móvil */
         }
 
-        /* Glassmorphism Moderno y Limpio */
+        /* Glassmorphism Moderno */
         .glass-panel { 
             background: rgba(15, 23, 42, 0.6); 
             backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08); 
             box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
         }
 
         /* Inputs profesionales */
         input, textarea, select {
-            background-color: rgba(30, 41, 59, 0.5) !important; /* Slate 800 */
+            background-color: rgba(30, 41, 59, 0.5) !important; 
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
             color: #f1f5f9 !important;
             transition: all 0.3s ease;
@@ -58,18 +60,18 @@
         .fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-radius: 50%; width: 20px; height: 20px; border-top-color: currentColor; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         .markdown-body p { margin-bottom: 0.8em; }
+        .markdown-body img { max-width: 100%; border-radius: 12px; margin-top: 10px; }
         
         /* Scrollbar Minimalista */
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        /* Animación de cartas especiales */
+        /* Celebración / Confeti */
         @keyframes celebrate {
             0% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
             50% { transform: scale(1.02); box-shadow: 0 10px 30px -5px rgba(255,255,255,0.1); }
@@ -77,9 +79,19 @@
         }
         .celebration-card { animation: celebrate 3s infinite ease-in-out; }
 
-        /* Toggle Switch Custom */
-        .toggle-checkbox:checked { right: 0; border-color: #ffffff; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #ffffff; }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        .confetti { position: fixed; font-size: 24px; animation: fall linear infinite; z-index: 100; pointer-events: none; }
+
+        /* Fuente de Post-It */
+        .font-handwriting { font-family: 'Permanent Marker', cursive; }
+        .post-it-bg { background: linear-gradient(135deg, #fef08a 0%, #fde047 100%); }
+
+        /* Ocultar barra de scroll en contenedor de chips */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body>
@@ -90,38 +102,42 @@
         // ⚙️ ZONA DE CONFIGURACIÓN ⚙️
         // ==========================================
         
-        const firebaseConfig = {
-            apiKey: "AIzaSyAgO63zHV7R2A7PTTMPEpl28qpXnuv1jZE",
-            authDomain: "wiki-amor.firebaseapp.com",
-            projectId: "wiki-amor",
-            storageBucket: "wiki-amor.firebasestorage.app",
-            messagingSenderId: "676402129654",
-            appId: "1:676402129654:web:199572eb9981cd10741ad7"
-        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'wiki-amor-app';
+        let fbConfig;
+        try {
+            fbConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        } catch(e) { console.error("Error config", e); }
+
+        if (!fbConfig) {
+            fbConfig = {
+                apiKey: "AIzaSyAgO63zHV7R2A7PTTMPEpl28qpXnuv1jZE",
+                authDomain: "wiki-amor.firebaseapp.com",
+                projectId: "wiki-amor",
+                storageBucket: "wiki-amor.firebasestorage.app",
+                messagingSenderId: "676402129654",
+                appId: "1:676402129654:web:199572eb9981cd10741ad7"
+            };
+        }
 
         const GEMINI_MODELS_TO_TRY = [ "gemini-2.5-flash-preview-09-2025", "gemini-1.5-flash", "gemini-1.5-flash-001", "gemini-1.5-pro" ];
-        const GEMINI_API_KEY = "AIzaSyCh1ETP6wY9fO-nFsfmEYBcZgAB6G9LZ9E"; 
+        const apiKey = "AIzaSyCNL7s8c4h2U_smiCzwn9Ffd9_5ACFxOKU"; 
 
-        // ==========================================
-        
         if (!firebase.apps.length) {
             try {
-                firebase.initializeApp(firebaseConfig);
+                firebase.initializeApp(fbConfig);
                 firebase.firestore().enablePersistence().catch(err => console.log("Persistencia:", err.code));
             } catch (e) { console.error("Error Firebase", e); }
         }
 
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const collectionName = "pareja_wiki_data"; 
+        const getBaseRef = () => db.collection('artifacts').doc(appId).collection('public').doc('data');
 
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
         // --- ICONOS ---
         const IconBase = ({ children, size = 24, className = "" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                {children}
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
         );
         const Heart = (p) => <IconBase {...p}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></IconBase>;
         const Download = (p) => <IconBase {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></IconBase>;
@@ -131,90 +147,91 @@
         const User = (p) => <IconBase {...p}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></IconBase>;
         const Plus = (p) => <IconBase {...p}><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></IconBase>;
         const X = (p) => <IconBase {...p}><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></IconBase>;
-        const Cloud = (p) => <IconBase {...p}><path d="M17.5 19c0-3.037-2.463-5.5-5.5-5.5S6.5 15.963 6.5 19"/><path d="M4.5 19a5.5 5.5 0 1 1 3-10.16"/><path d="M19.5 19a5.5 5.5 0 1 0-3-10.16"/><line x1="1" y1="19" x2="23" y2="19"/></IconBase>;
         const Sparkles = (p) => <IconBase {...p}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M9 3v4"/><path d="M3 5h4"/><path d="M3 9h4"/></IconBase>;
         const Check = (p) => <IconBase {...p}><polyline points="20 6 9 17 4 12"/></IconBase>;
         const Dice = (p) => <IconBase {...p}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><circle cx="15" cy="15" r="2"></circle></IconBase>;
-        const AlertCircle = (p) => <IconBase {...p}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></IconBase>;
-        const Clock = (p) => <IconBase {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></IconBase>;
-        const Info = (p) => <IconBase {...p}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></IconBase>;
         const CalendarIcon = (p) => <IconBase {...p}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></IconBase>;
-        const Bell = (p) => <IconBase {...p}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></IconBase>;
+        const Clock = (p) => <IconBase {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></IconBase>;
         const Repeat = (p) => <IconBase {...p}><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></IconBase>;
+        const ImageIcon = (p) => <IconBase {...p}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></IconBase>;
+        const BoldIcon = (p) => <IconBase {...p}><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></IconBase>;
+        const ItalicIcon = (p) => <IconBase {...p}><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></IconBase>;
+        const GitCommit = (p) => <IconBase {...p}><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="8" y2="12"/><line x1="16" y1="12" x2="22.95" y2="12"/></IconBase>;
+        const SettingsIcon = (p) => <IconBase {...p}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></IconBase>;
 
+        // --- COMPONENTES AUXILIARES ---
         const Toast = ({ message, type = 'success', onClose }) => {
             useEffect(() => { const timer = setTimeout(onClose, 4000); return () => clearTimeout(timer); }, [onClose]);
-            const bgClass = type === 'success' ? 'bg-green-900/80 border-green-500 text-green-100' : 
-                           type === 'error' ? 'bg-red-900/80 border-red-500 text-red-100' : 
-                           'bg-blue-900/80 border-blue-500 text-blue-100';
-            const icon = type === 'success' ? <Check size={18} /> : type === 'error' ? <X size={18} /> : type === 'info' ? <Bell size={18} /> : <AlertCircle size={18} />;
-            return (<div className={`fixed bottom-4 right-4 ${bgClass} border px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 toast-enter z-[100] backdrop-blur`}>{icon}<span className="font-bold">{message}</span></div>);
+            const bgClass = type === 'success' ? 'bg-green-900/80 border-green-500 text-green-100' : type === 'error' ? 'bg-red-900/80 border-red-500 text-red-100' : 'bg-blue-900/80 border-blue-500 text-blue-100';
+            return (<div className={`fixed top-4 md:bottom-4 md:top-auto right-4 left-4 md:left-auto ${bgClass} border px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 toast-enter z-[100] backdrop-blur`}><Check size={18} /><span className="font-bold">{message}</span></div>);
         };
 
         const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
             if (!isOpen) return null;
-            return (<div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 fade-in p-4"><div className="glass-panel p-8 rounded-3xl shadow-2xl max-w-sm w-full bg-[#0f172a]"><h3 className="text-xl font-bold text-white mb-4">¿Estás seguro?</h3><p className="text-gray-400 mb-8 text-sm">{message}</p><div className="flex gap-3 justify-end"><button onClick={onClose} className="px-5 py-2.5 rounded-xl text-gray-300 hover:bg-white/5 font-bold transition-colors text-sm">Cancelar</button><button onClick={onConfirm} className="px-5 py-2.5 rounded-xl bg-red-600 text-white hover:bg-red-700 font-bold shadow-lg transition-colors text-sm">Sí, confirmar</button></div></div></div>);
+            return (<div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] fade-in p-4"><div className="glass-panel p-8 rounded-3xl shadow-2xl max-w-sm w-full"><h3 className="text-xl font-bold text-white mb-4">¿Estás seguro?</h3><p className="text-gray-400 mb-8 text-sm">{message}</p><div className="flex gap-3 justify-end"><button onClick={onClose} className="px-5 py-2.5 rounded-xl text-gray-300 hover:bg-white/5 font-bold transition-colors text-sm">Cancelar</button><button onClick={onConfirm} className="px-5 py-2.5 rounded-xl bg-red-600 text-white hover:bg-red-700 font-bold shadow-lg transition-colors text-sm">Sí, confirmar</button></div></div></div>);
         };
 
-        const HelpModal = ({ isOpen, onClose }) => {
-            if (!isOpen) return null;
-            return (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 fade-in p-4">
-                    <div className="glass-panel p-8 rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto" style={{backgroundColor: '#0f172a'}}>
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-2xl font-bold text-white flex items-center gap-3">📚 Guía Rápida</h3>
-                            <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors"><X size={24}/></button>
-                        </div>
-                        <div className="space-y-6 text-gray-400 help-list">
-                            <div><h4 className="font-bold text-white flex items-center gap-2 text-lg mb-1"><Search size={20} className="text-sky-400"/> Wiki</h4><p className="text-sm leading-relaxed">Tu enciclopedia personal. Guarda datos como tallas, alergias o gustos. Úsala para no olvidar detalles importantes.</p></div>
-                            <div className="h-px bg-white/10 w-full"></div>
-                            <div><h4 className="font-bold text-white flex items-center gap-2 text-lg mb-1"><Dice size={20} className="text-purple-400"/> Juego</h4><p className="text-sm leading-relaxed">Genera preguntas aleatorias para conocerse mejor. Si solo uno responde, se guarda en pendientes hasta que el otro responda.</p></div>
-                            <div className="h-px bg-white/10 w-full"></div>
-                            <div><h4 className="font-bold text-white flex items-center gap-2 text-lg mb-1"><CalendarIcon size={20} className="text-orange-400"/> Fechas</h4><p className="text-sm leading-relaxed">Control de aniversarios y cumpleaños. La app te avisa 3 días antes.</p></div>
-                        </div>
-                    </div>
-                </div>
-            );
+        const Confetti = () => {
+            const emojis = ['❤️', '✨', '🎉', '💖'];
+            const pieces = Array.from({length: 40}).map((_, i) => ({
+                id: i, emoji: emojis[Math.floor(Math.random() * emojis.length)],
+                left: `${Math.random() * 100}vw`, animationDuration: `${Math.random() * 3 + 2}s`, animationDelay: `${Math.random() * 2}s`, fontSize: `${Math.random() * 15 + 15}px`
+            }));
+            return (<div className="fixed inset-0 pointer-events-none z-[60] overflow-hidden">{pieces.map(p => <div key={p.id} className="confetti" style={{left: p.left, animationDuration: p.animationDuration, animationDelay: p.animationDelay, fontSize: p.fontSize}}>{p.emoji}</div>)}</div>);
         };
 
         const App = () => {
             const [user, setUser] = useState(null);
             const [activeProfile, setActiveProfile] = useState('novia');
-            const [viewMode, setViewMode] = useState('wiki');
+            const [viewMode, setViewMode] = useState('wiki'); 
+            
+            // Datos
             const [entries, setEntries] = useState([]);
             const [categories, setCategories] = useState(['Básica', 'Gustos', 'Difícil / Profunda', 'Familia', 'Historia', 'Curiosidad']);
-            const [formData, setFormData] = useState({ category: '', question: '', answer: '' });
+            const [pendingGames, setPendingGames] = useState([]);
+            const [datesList, setDatesList] = useState([]);
+            const [relationshipStart, setRelationshipStart] = useState(null);
+            const [postItText, setPostItText] = useState("¡Que tengas un día hermoso! ❤️");
+            const [isEditingPostIt, setIsEditingPostIt] = useState(false);
+            
+            // UI States
+            const [formData, setFormData] = useState({ category: '', question: '', answer: '', imageUrl: '' });
             const [searchTerm, setSearchTerm] = useState('');
+            const [activeCategoryFilter, setActiveCategoryFilter] = useState('Todas');
             const [isAddingCategory, setIsAddingCategory] = useState(false);
             const [newCategoryName, setNewCategoryName] = useState('');
-            const [isLoading, setIsLoading] = useState(true);
             const [editingId, setEditingId] = useState(null);
             const [toast, setToast] = useState(null);
             const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null, type: null });
-            const [helpModalOpen, setHelpModalOpen] = useState(false); 
-            const [aiQuery, setAiQuery] = useState('');
-            const [aiResponse, setAiResponse] = useState('');
-            const [isAiThinking, setIsAiThinking] = useState(false);
+            const [showSettings, setShowSettings] = useState(false);
+            const [showConfetti, setShowConfetti] = useState(false);
+            const [visibleEntriesCount, setVisibleEntriesCount] = useState(15);
+            
+            // Game States
             const [gameQuestion, setGameQuestion] = useState('');
             const [isGeneratingGame, setIsGeneratingGame] = useState(false);
             const [answerFlor, setAnswerFlor] = useState('');
             const [answerTereque, setAnswerTereque] = useState('');
-            const [pendingGames, setPendingGames] = useState([]);
             const [pendingAnswers, setPendingAnswers] = useState({});
-            const [gameAnalysis, setGameAnalysis] = useState('');
-            const [isAnalyzingGame, setIsAnalyzingGame] = useState(false);
             
-            const [datesList, setDatesList] = useState([]);
+            // Date States
             const [newDateTitle, setNewDateTitle] = useState('');
             const [newDateValue, setNewDateValue] = useState('');
             const [newDateRepeats, setNewDateRepeats] = useState(true);
-            const [relationshipStart, setRelationshipStart] = useState(null);
             const [showDateInput, setShowDateInput] = useState(false);
             const [editingDateId, setEditingDateId] = useState(null);
 
+            const answerRef = useRef(null);
+
             useEffect(() => {
                 const initAuth = async () => {
-                    try { await auth.signInAnonymously(); } catch (error) { showToast("Error Auth", 'error'); }
+                    try { 
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await auth.signInWithCustomToken(__initial_auth_token);
+                        } else {
+                            await auth.signInAnonymously(); 
+                        }
+                    } catch (error) { console.error("Auth Error:", error); showToast("Error de conexión", 'error'); }
                 };
                 initAuth();
                 return auth.onAuthStateChanged((u) => setUser(u));
@@ -222,112 +239,105 @@
 
             useEffect(() => {
                 if (!user) return;
-                const wikiRef = db.collection(collectionName).doc('data').collection('wiki_entries');
-                return wikiRef.onSnapshot((snapshot) => {
+                const wikiRef = getBaseRef().collection('wiki_entries');
+                const unsubWiki = wikiRef.onSnapshot((snapshot) => {
                     const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => b.timestamp - a.timestamp);
-                    setEntries(loaded); setIsLoading(false);
-                }, (err) => { setIsLoading(false); });
-            }, [user]);
-
-            useEffect(() => {
-                if (!user) return;
-                const pendingRef = db.collection(collectionName).doc('data').collection('pending_games');
-                return pendingRef.orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
-                    setPendingGames(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                    setEntries(loaded);
                 });
-            }, [user]);
 
-            useEffect(() => {
-                if (!user) return;
-                const datesRef = db.collection(collectionName).doc('data').collection('important_dates');
+                const pendingRef = getBaseRef().collection('pending_games');
+                const unsubPend = pendingRef.onSnapshot((snapshot) => {
+                    const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => b.timestamp - a.timestamp);
+                    setPendingGames(loaded);
+                });
+
+                const datesRef = getBaseRef().collection('important_dates');
                 const unsubDates = datesRef.onSnapshot((snapshot) => {
-                    const loadedDates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    setDatesList(loadedDates);
-                    checkUpcomingDates(loadedDates); 
+                    const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setDatesList(loaded);
+                    checkUpcomingDates(loaded); 
                 });
                 
-                const relRef = db.collection(collectionName).doc('data').collection('settings').doc('relationship');
-                const unsubRel = relRef.onSnapshot(doc => {
-                    if(doc.exists) setRelationshipStart(doc.data().date);
-                });
+                const settingsRef = getBaseRef().collection('settings');
+                const unsubRel = settingsRef.doc('relationship').onSnapshot(doc => { if(doc.exists) setRelationshipStart(doc.data().date); });
+                const unsubCat = settingsRef.doc('categories').onSnapshot(doc => { if(doc.exists) setCategories(doc.data().list || ['Básica']); });
+                const unsubPostit = settingsRef.doc('postit').onSnapshot(doc => { if(doc.exists) setPostItText(doc.data().text || "¡Que tengas un día hermoso! ❤️"); });
 
-                return () => { unsubDates(); unsubRel(); };
-            }, [user]);
-
-            useEffect(() => {
-                if (!user) return;
-                const catRef = db.collection(collectionName).doc('data').collection('settings').doc('categories');
-                return catRef.onSnapshot((docSnap) => { if (docSnap.exists) { setCategories(docSnap.data().list || ['Básica']); } });
+                return () => { unsubWiki(); unsubPend(); unsubDates(); unsubRel(); unsubCat(); unsubPostit(); };
             }, [user]);
 
             const showToast = (message, type = 'success') => { setToast({ message, type }); };
 
             useEffect(() => { if (!formData.category && categories.length > 0) setFormData(prev => ({...prev, category: categories[0]})); }, [categories]);
             
-            // --- LÓGICA DE COLOR POR PERFIL ---
             useEffect(() => {
-                if(activeProfile === 'novia') {
-                    // ROJO VINO / BORGOÑA
-                    document.body.style.background = "radial-gradient(circle at 50% 0%, #4a0404 0%, #0a0000 100%)";
-                } else {
-                    // AZUL OSCURO PROFUNDO
-                    document.body.style.background = "radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 100%)";
-                }
-                
-                setAiResponse(''); setAiQuery(''); setEditingId(null); setFormData(prev => ({ category: categories[0], question: '', answer: '' })); setGameAnalysis('');
+                if(activeProfile === 'novia') document.body.style.background = "radial-gradient(circle at 50% 0%, #4a0404 0%, #0a0000 100%)";
+                else document.body.style.background = "radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 100%)";
+                setEditingId(null); 
+                setFormData(prev => ({ category: categories[0], question: '', answer: '', imageUrl: '' })); 
                 setEditingDateId(null); setNewDateTitle(''); setNewDateValue(''); setNewDateRepeats(true);
+                setVisibleEntriesCount(15);
             }, [activeProfile, viewMode]);
 
+            // --- WIKI LOGIC ---
             const handleInputChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+            
+            const insertFormatting = (prefix, suffix = '') => {
+                const textarea = answerRef.current;
+                if (!textarea) return;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const currentText = formData.answer;
+                const before = currentText.substring(0, start);
+                const selection = currentText.substring(start, end);
+                const after = currentText.substring(end);
+                
+                const newText = before + prefix + selection + suffix + after;
+                setFormData(prev => ({ ...prev, answer: newText }));
+                setTimeout(() => { textarea.focus(); textarea.setSelectionRange(start + prefix.length, start + prefix.length + selection.length); }, 0);
+            };
 
             const handleSubmit = async (e) => {
                 e.preventDefault();
                 if (!user) return showToast("Conectando...", 'error');
-                const wikiRef = db.collection(collectionName).doc('data').collection('wiki_entries');
-                const data = { target: activeProfile, category: formData.category, question: formData.question, answer: formData.answer, date: new Date().toLocaleDateString(), timestamp: Date.now() };
+                const data = { target: activeProfile, category: formData.category, question: formData.question, answer: formData.answer, imageUrl: formData.imageUrl || null, date: new Date().toLocaleDateString(), timestamp: Date.now() };
                 try {
-                    if (editingId) { await wikiRef.doc(editingId).update({category: formData.category, question: formData.question, answer: formData.answer}); showToast("Actualizado ✨"); setEditingId(null); }
-                    else { await wikiRef.add(data); showToast("Guardado ❤️"); }
-                    setFormData(prev => ({ ...prev, question: '', answer: '' }));
+                    if (editingId) { await getBaseRef().collection('wiki_entries').doc(editingId).update(data); showToast("Actualizado ✨"); setEditingId(null); }
+                    else { await getBaseRef().collection('wiki_entries').add(data); showToast("Guardado ❤️"); }
+                    setFormData(prev => ({ ...prev, question: '', answer: '', imageUrl: '' }));
                 } catch (err) { showToast("Error al guardar", 'error'); }
             };
 
-            const handleEdit = (e) => { setEditingId(e.id); setFormData({ category: e.category, question: e.question, answer: e.answer }); window.scrollTo({top:0, behavior:'smooth'}); showToast("Editando...", 'info'); };
-            const handleCancelEdit = () => { setEditingId(null); setFormData(prev => ({ ...prev, question: '', answer: '' })); };
-            const handleDelete = (id) => setDeleteModal({ isOpen: true, id, type: 'wiki' });
+            const handleEdit = (e) => { setEditingId(e.id); setFormData({ category: e.category, question: e.question, answer: e.answer, imageUrl: e.imageUrl || '' }); window.scrollTo({top:0, behavior:'smooth'}); showToast("Editando...", 'info'); };
+            const handleCancelEdit = () => { setEditingId(null); setFormData(prev => ({ ...prev, question: '', answer: '', imageUrl: '' })); };
+            
             const confirmDelete = async () => {
                 const { id, type } = deleteModal;
                 if (!id) return;
-                if(type === 'wiki') { await db.collection(collectionName).doc('data').collection('wiki_entries').doc(id).delete(); if(editingId===id) handleCancelEdit(); showToast("Eliminado 🗑️"); }
-                else if(type === 'game_skip') { await db.collection(collectionName).doc('data').collection('pending_games').doc(id).delete(); showToast("Descartado"); }
-                else if(type === 'date') { await db.collection(collectionName).doc('data').collection('important_dates').doc(id).delete(); showToast("Fecha eliminada"); }
+                try {
+                    if(type === 'wiki') { await getBaseRef().collection('wiki_entries').doc(id).delete(); if(editingId===id) handleCancelEdit(); showToast("Eliminado 🗑️"); }
+                    else if(type === 'game_skip') { await getBaseRef().collection('pending_games').doc(id).delete(); showToast("Descartado"); }
+                    else if(type === 'date') { await getBaseRef().collection('important_dates').doc(id).delete(); showToast("Fecha eliminada"); }
+                } catch (e) { showToast("Error", "error"); }
                 setDeleteModal({ isOpen: false, id: null, type: null });
             };
 
             const handleAddCategory = async () => {
                 if(newCategoryName.trim() && !categories.includes(newCategoryName)) {
                     const newCats = [...categories, newCategoryName];
-                    await db.collection(collectionName).doc('data').collection('settings').doc('categories').set({list: newCats});
+                    await getBaseRef().collection('settings').doc('categories').set({list: newCats});
                     setFormData(prev => ({...prev, category: newCategoryName})); setNewCategoryName(''); setIsAddingCategory(false);
                 }
             };
 
-            const downloadCSV = () => {
-                let csv = "\uFEFFDe Quién;Categoría;Pregunta;Respuesta;Fecha\n";
-                entries.filter(e => e.target === activeProfile).forEach(r => {
-                    csv += `"${r.target==='novia'?'Flor':'Terequito'}";"${r.category}";"${(r.question||'').replace(/"/g,'""')}";"${(r.answer||'').replace(/"/g,'""')}";"${r.date}"\n`;
-                });
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv;charset=utf-8;'}));
-                link.download = "wiki_amor.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            };
-
+            // --- JUEGOS Y AI ---
             const fetchAI = async (prompt) => {
-                if(!GEMINI_API_KEY.startsWith("AIza")) return "⚠️ Error API Key";
+                const activeKey = apiKey || "AIzaSyCh1ETP6wY9fO-nFsfmEYBcZgAB6G9LZ9E"; 
+                if(!activeKey.startsWith("AIza")) return "⚠️ Error API Key";
                 const safetySettings = [ { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" } ];
                 for (const model of GEMINI_MODELS_TO_TRY) {
                     try {
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], safetySettings: safetySettings }) });
+                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], safetySettings: safetySettings }) });
                         const d = await res.json();
                         if (d.error) throw new Error(d.error.message);
                         return d.candidates?.[0]?.content?.parts?.[0]?.text || "La IA no respondió.";
@@ -336,38 +346,22 @@
                 return "⚠️ La IA está durmiendo.";
             };
 
-            const handleAskAI = async (e) => {
-                e.preventDefault(); if(!aiQuery.trim()) return;
-                setIsAiThinking(true);
-                const context = entries.filter(x => x.target === activeProfile).map(x => `- ${x.category}: P:${x.question} R:${x.answer}`).join("\n");
-                const resp = await fetchAI(`Experto en ${activeProfile==='novia'?'Flor':'Terequito'}. Datos: ${context}. Pregunta: ${aiQuery}. Responde breve y cariñoso.`);
-                setAiResponse(resp); setIsAiThinking(false);
-            };
-
             const handleGenerateGameQuestion = async () => {
                 setIsGeneratingGame(true); setGameQuestion(''); setAnswerFlor(''); setAnswerTereque('');
-                const q = await fetchAI("Genera una pregunta interesante para parejas (Flor y Terequito) para conocerse mejor. Solo la pregunta.");
+                const q = await fetchAI("Genera una pregunta profunda, romántica o divertida para parejas (Flor y Terequito) para conocerse mejor. Solo escribe la pregunta directamente.");
                 setGameQuestion(q); setIsGeneratingGame(false);
-            };
-
-            const handleAnalyzeGame = async () => {
-                setIsAnalyzingGame(true);
-                const resp = await fetchAI(`Analiza: Pregunta "${gameQuestion}". Flor: "${answerFlor}". Terequito: "${answerTereque}". Breve y divertido.`);
-                setGameAnalysis(resp); setIsAnalyzingGame(false);
             };
 
             const handleSaveActiveGame = async () => {
                 if(!gameQuestion) return;
                 const hF = !!answerFlor.trim(), hT = !!answerTereque.trim();
                 if(!hF && !hT) return showToast("Escribe algo", 'error');
-                const wikiRef = db.collection(collectionName).doc('data').collection('wiki_entries');
-                const pendRef = db.collection(collectionName).doc('data').collection('pending_games');
                 if(hF && hT) {
-                    await wikiRef.add({target:'novia', category:'Juego AI 🎲', question:gameQuestion, answer:answerFlor, date:new Date().toLocaleDateString(), timestamp: Date.now()});
-                    await wikiRef.add({target:'novio', category:'Juego AI 🎲', question:gameQuestion, answer:answerTereque, date:new Date().toLocaleDateString(), timestamp: Date.now()+1});
+                    await getBaseRef().collection('wiki_entries').add({target:'novia', category:'Juego AI 🎲', question:gameQuestion, answer:answerFlor, date:new Date().toLocaleDateString(), timestamp: Date.now()});
+                    await getBaseRef().collection('wiki_entries').add({target:'novio', category:'Juego AI 🎲', question:gameQuestion, answer:answerTereque, date:new Date().toLocaleDateString(), timestamp: Date.now()+1});
                     showToast("¡Completado! 🎉"); setGameQuestion(''); setAnswerFlor(''); setAnswerTereque('');
                 } else {
-                    await pendRef.add({question:gameQuestion, answerFlor, answerTereque, timestamp: Date.now()});
+                    await getBaseRef().collection('pending_games').add({question:gameQuestion, answerFlor, answerTereque, timestamp: Date.now()});
                     showToast("Guardado en pendientes ⏳"); setGameQuestion(''); setAnswerFlor(''); setAnswerTereque('');
                 }
             };
@@ -376,34 +370,21 @@
                 const nF = pendingAnswers[`${game.id}_flor`] || game.answerFlor || '';
                 const nT = pendingAnswers[`${game.id}_tereque`] || game.answerTereque || '';
                 if(!nF.trim() || !nT.trim()) return; 
-                const wikiRef = db.collection(collectionName).doc('data').collection('wiki_entries');
-                await wikiRef.add({target:'novia', category:'Juego AI 🎲', question:game.question, answer:nF, date:new Date().toLocaleDateString(), timestamp: Date.now()});
-                await wikiRef.add({target:'novio', category:'Juego AI 🎲', question:game.question, answer:nT, date:new Date().toLocaleDateString(), timestamp: Date.now()+1});
-                await db.collection(collectionName).doc('data').collection('pending_games').doc(game.id).delete();
+                await getBaseRef().collection('wiki_entries').add({target:'novia', category:'Juego AI 🎲', question:game.question, answer:nF, date:new Date().toLocaleDateString(), timestamp: Date.now()});
+                await getBaseRef().collection('wiki_entries').add({target:'novio', category:'Juego AI 🎲', question:game.question, answer:nT, date:new Date().toLocaleDateString(), timestamp: Date.now()+1});
+                await getBaseRef().collection('pending_games').doc(game.id).delete();
                 showToast("¡Turno completado! 🎉");
             };
 
-            const handleSkipPendingGame = (id) => setDeleteModal({ isOpen: true, id, type: 'game_skip' });
+            // --- FECHAS Y TIMELINE ---
             const handleSaveDate = async (e) => {
                 e.preventDefault();
                 if(!newDateTitle || !newDateValue) return;
-                const datesRef = db.collection(collectionName).doc('data').collection('important_dates');
                 try {
-                    if (editingDateId) { await datesRef.doc(editingDateId).update({ title: newDateTitle, date: newDateValue, repeats: newDateRepeats }); showToast("Fecha actualizada ✨"); setEditingDateId(null); } 
-                    else { await datesRef.add({ title: newDateTitle, date: newDateValue, repeats: newDateRepeats, timestamp: Date.now() }); showToast("Fecha guardada 📅"); }
+                    if (editingDateId) { await getBaseRef().collection('important_dates').doc(editingDateId).update({ title: newDateTitle, date: newDateValue, repeats: newDateRepeats }); showToast("Fecha actualizada ✨"); setEditingDateId(null); } 
+                    else { await getBaseRef().collection('important_dates').add({ title: newDateTitle, date: newDateValue, repeats: newDateRepeats, timestamp: Date.now() }); showToast("Fecha guardada 📅"); }
                     setNewDateTitle(''); setNewDateValue(''); setNewDateRepeats(true);
-                } catch (error) { showToast("Error al guardar fecha", 'error'); }
-            };
-            const handleDeleteDate = (id) => setDeleteModal({ isOpen: true, id, type: 'date' });
-            const handleEditDate = (date) => { setEditingDateId(date.id); setNewDateTitle(date.title); setNewDateValue(date.date); setNewDateRepeats(date.repeats !== false); window.scrollTo({ top: 0, behavior: 'smooth' }); showToast("Editando fecha...", 'info'); };
-            const handleCancelDateEdit = () => { setEditingDateId(null); setNewDateTitle(''); setNewDateValue(''); setNewDateRepeats(true); };
-            const handleSaveRelationshipDate = async () => { if (!newDateValue) return; await db.collection(collectionName).doc('data').collection('settings').doc('relationship').set({ date: newDateValue }); showToast("¡Historia iniciada! ❤️"); setShowDateInput(false); setNewDateValue(''); };
-            
-            const formatDateDisplay = (isoDateString) => {
-                if (!isoDateString) return "";
-                const [y, m, d] = isoDateString.split('-');
-                const date = new Date(y, m - 1, d);
-                return date.toLocaleDateString();
+                } catch (error) { showToast("Error al guardar", 'error'); }
             };
 
             const getDaysUntil = (dateObjOrString) => {
@@ -437,88 +418,203 @@
 
             const checkUpcomingDates = (dates) => {
                 const upcoming = dates.filter(d => { const days = getDaysUntil(d); return days >= 0 && days <= 3; });
-                if (upcoming.length > 0) {
-                    const closest = upcoming.sort((a,b) => getDaysUntil(a) - getDaysUntil(b))[0];
-                    const days = getDaysUntil(closest);
-                    if (days === 0) showToast(`🎉 ¡HOY ES ${closest.title.toUpperCase()}! 🎉`, 'success');
-                    else showToast(`📅 ¡Faltan ${days} días para ${closest.title}!`, 'info');
+                if (upcoming.some(d => getDaysUntil(d) === 0)) setShowConfetti(true);
+                else setShowConfetti(false);
+            };
+
+            const getTimelineData = () => {
+                const timeline = [];
+                if(relationshipStart) timeline.push({ id: 'start', type: 'start', title: 'Inicio de la Historia', date: relationshipStart, sortDate: new Date(relationshipStart).getTime() });
+                datesList.forEach(d => { timeline.push({ ...d, type: 'date', sortDate: new Date(d.date).getTime() }); });
+                entries.forEach(e => { if(e.timestamp) timeline.push({ ...e, type: 'wiki', title: e.question, sortDate: e.timestamp }); });
+                return timeline.sort((a,b) => b.sortDate - a.sortDate);
+            };
+
+            // --- CUENTA Y RESPALDOS ---
+            const handleBackup = () => {
+                const data = { wiki: entries, games: pendingGames, dates: datesList, relationshipStart };
+                const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "wiki_amor_respaldo.json"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                showToast("Respaldo descargado");
+            };
+
+            const handleGoogleLink = async () => {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    await auth.currentUser.linkWithPopup(provider);
+                    showToast("Cuenta vinculada con éxito", "success");
+                    setShowSettings(false);
+                } catch(e) {
+                    // Manejo silencioso de errores para evitar mostrar registros rojos feos en la consola
+                    if (e.code === 'auth/unauthorized-domain') {
+                        showToast("Dominio bloqueado: Añade este sitio en Firebase Console (Auth > Settings > Authorized domains).", "error");
+                    } else {
+                        showToast("Error al vincular con Google. Intenta realizar un respaldo manual.", "error");
+                    }
                 }
             };
-            
-            if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-400"><div className="spinner border-rose-500 mb-4"></div>Iniciando...</div>;
 
-            const duration = calculateDuration(relationshipStart);
-            const daysToAnniversary = relationshipStart ? getDaysUntil({date: relationshipStart, repeats: true}) : 0;
+            const savePostIt = async (e) => {
+                const text = e.target.innerText;
+                setPostItText(text);
+                await getBaseRef().collection('settings').doc('postit').set({text});
+                setIsEditingPostIt(false);
+                showToast("Nota guardada");
+            };
 
-            // Configuración de Tema por Perfil
+            // Filtrado de Wiki
+            const filteredEntries = entries.filter(e => {
+                if (e.target !== activeProfile) return false;
+                if (activeCategoryFilter !== 'Todas' && e.category !== activeCategoryFilter) return false;
+                if (searchTerm && !e.question.toLowerCase().includes(searchTerm.toLowerCase()) && !e.answer.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+                return true;
+            });
+
+            if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-400"><div className="spinner border-rose-500 mb-4"></div>Conectando...</div>;
+
             const theme = activeProfile === 'novia' 
-                ? { 
-                    accent: 'text-rose-500', 
-                    accentHover: 'hover:text-rose-400',
-                    border: 'border-rose-900', 
-                    btnBg: 'bg-gradient-to-r from-rose-900 to-red-900 hover:from-rose-800 hover:to-red-800',
-                    ring: 'focus:ring-rose-900',
-                    glass: 'rgba(40, 10, 20, 0.7)',
-                    glow: 'shadow-rose-900/20',
-                    labelColor: 'text-rose-200'
-                  } 
-                : { 
-                    accent: 'text-sky-500', 
-                    accentHover: 'hover:text-sky-400',
-                    border: 'border-sky-900', 
-                    btnBg: 'bg-gradient-to-r from-sky-900 to-blue-900 hover:from-sky-800 hover:to-blue-800',
-                    ring: 'focus:ring-sky-900',
-                    glass: 'rgba(10, 20, 40, 0.7)',
-                    glow: 'shadow-sky-900/20',
-                    labelColor: 'text-sky-200'
-                  };
+                ? { accent: 'text-rose-500', bg: 'bg-rose-900', hover: 'hover:bg-rose-800', border: 'border-rose-900', glow: 'shadow-rose-900/20' } 
+                : { accent: 'text-sky-500', bg: 'bg-sky-900', hover: 'hover:bg-sky-800', border: 'border-sky-900', glow: 'shadow-sky-900/20' };
 
             return (
-                <div className="min-h-screen p-4 md:p-8 max-w-5xl mx-auto pb-24">
+                <div className="p-4 md:p-8 max-w-5xl mx-auto">
+                    {showConfetti && <Confetti />}
                     {toast && <Toast message={toast.message} type={toast.type} onClose={()=>setToast(null)} />}
-                    <ConfirmationModal isOpen={deleteModal.isOpen} onClose={()=>setDeleteModal({isOpen:false})} onConfirm={confirmDelete} message={deleteModal.type==='wiki'?"¿Borrar recuerdo?":deleteModal.type==='date'?"¿Borrar fecha importante?":"¿Descartar pregunta?"} />
-                    <HelpModal isOpen={helpModalOpen} onClose={()=>setHelpModalOpen(false)} />
+                    <ConfirmationModal isOpen={deleteModal.isOpen} onClose={()=>setDeleteModal({isOpen:false})} onConfirm={confirmDelete} message="Esta acción no se puede deshacer." />
                     
-                    {/* HEADER */}
-                    <header className="mb-8 glass-panel p-3 rounded-3xl flex flex-wrap justify-between gap-4 sticky top-4 z-50" style={{backgroundColor: theme.glass, borderColor: 'rgba(255,255,255,0.05)'}}>
-                        <div className="flex gap-3 items-center">
+                    {/* SETTINGS MODAL */}
+                    {showSettings && (
+                        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4 fade-in">
+                            <div className="glass-panel p-8 rounded-3xl max-w-md w-full" style={{backgroundColor: '#0f172a'}}>
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-2xl font-bold text-white flex items-center gap-3"><SettingsIcon/> Cuenta & Respaldo</h3>
+                                    <button onClick={()=>setShowSettings(false)} className="text-gray-500 hover:text-white"><X size={24}/></button>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="bg-white/5 p-4 rounded-xl border border-white/10 text-sm text-gray-300 leading-relaxed">
+                                        Tus datos ya están guardados en la <b>Nube</b> automáticamente. Sin embargo, como usas una cuenta de invitado, podrías perder acceso si limpias el navegador.
+                                    </div>
+                                    <button onClick={handleBackup} className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-xl font-bold transition-all shadow-lg">
+                                        <Download size={20}/> Descargar Respaldo Total
+                                    </button>
+                                    <div className="text-center text-gray-500 text-sm">o</div>
+                                    <button onClick={handleGoogleLink} className="w-full flex items-center justify-center gap-3 bg-white text-gray-900 hover:bg-gray-200 p-4 rounded-xl font-bold transition-all shadow-lg">
+                                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5"/> Vincular con Google
+                                    </button>
+                                    <p className="text-[10px] text-gray-500 text-center mt-2">
+                                        Nota: Para que el inicio de sesión con Google funcione, debes agregar el dominio actual en tu consola de Firebase (Authentication &gt; Settings &gt; Authorized domains). En entornos de prueba o vista previa, es normal que esté bloqueado.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* DESKTOP HEADER */}
+                    <header className="hidden md:flex mb-8 glass-panel p-3 rounded-3xl flex-wrap justify-between gap-4 sticky top-4 z-50 bg-[#0f172a]/80 backdrop-blur-xl">
+                        <div className="flex gap-2 items-center">
                             <button onClick={()=>setViewMode('wiki')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 transition-all ${viewMode==='wiki' ? 'bg-white/10 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}><Search size={20}/> Wiki</button>
-                            <button onClick={()=>setViewMode('game')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 transition-all ${viewMode==='game' ? 'bg-purple-900/50 text-purple-200 shadow-lg border border-purple-500/30' : 'text-gray-500 hover:text-gray-300'} ${pendingGames.length>0?'pending-pulse':''}`}><Dice size={20}/> Juego {pendingGames.length>0 && <span className="bg-red-600 text-white text-xs px-1.5 rounded-full ml-1">{pendingGames.length}</span>}</button>
+                            <button onClick={()=>setViewMode('game')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 transition-all ${viewMode==='game' ? 'bg-purple-900/50 text-purple-200 shadow-lg border border-purple-500/30' : 'text-gray-500 hover:text-gray-300'}`}><Dice size={20}/> Juego {pendingGames.length>0 && <span className="bg-red-600 text-white text-xs px-1.5 rounded-full ml-1">{pendingGames.length}</span>}</button>
                             <button onClick={()=>setViewMode('dates')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 transition-all ${viewMode==='dates' ? 'bg-orange-900/50 text-orange-200 shadow-lg border border-orange-500/30' : 'text-gray-500 hover:text-gray-300'}`}><CalendarIcon size={20}/> Fechas</button>
+                            <button onClick={()=>setViewMode('timeline')} className={`px-4 py-2 rounded-xl font-bold flex gap-2 transition-all ${viewMode==='timeline' ? 'bg-green-900/50 text-green-200 shadow-lg border border-green-500/30' : 'text-gray-500 hover:text-gray-300'}`}><GitCommit size={20}/> Historia</button>
                         </div>
                         <div className="flex items-center gap-4">
                             {viewMode==='wiki' && (
                                 <div className="flex bg-black/30 p-1 rounded-xl border border-white/5">
-                                    <button onClick={()=>setActiveProfile('novia')} className={`px-4 py-1.5 rounded-lg font-bold flex gap-2 text-sm transition-all ${activeProfile==='novia'?'bg-rose-900/80 text-white shadow-md':'text-gray-500 hover:text-gray-300'}`}><Heart size={14} className={activeProfile==='novia'?'fill-current':''}/> Flor de Desierto</button>
+                                    <button onClick={()=>setActiveProfile('novia')} className={`px-4 py-1.5 rounded-lg font-bold flex gap-2 text-sm transition-all ${activeProfile==='novia'?'bg-rose-900/80 text-white shadow-md':'text-gray-500 hover:text-gray-300'}`}><Heart size={14} className={activeProfile==='novia'?'fill-current':''}/> Flor</button>
                                     <button onClick={()=>setActiveProfile('novio')} className={`px-4 py-1.5 rounded-lg font-bold flex gap-2 text-sm transition-all ${activeProfile==='novio'?'bg-sky-900/80 text-white shadow-md':'text-gray-500 hover:text-gray-300'}`}><User size={14} className={activeProfile==='novio'?'fill-current':''}/> Terequito</button>
                                 </div>
                             )}
-                             <button onClick={()=>setHelpModalOpen(true)} className="p-2 text-gray-500 hover:text-white transition-colors"><Info size={22}/></button>
-                             {viewMode==='wiki' && <button onClick={downloadCSV} className="p-2 text-gray-500 hover:text-white transition-colors" title="Descargar Excel"><Download size={22}/></button>}
+                             <button onClick={()=>setShowSettings(true)} className="p-2 text-gray-500 hover:text-white transition-colors" title="Cuenta & Respaldo"><SettingsIcon size={22}/></button>
                         </div>
                     </header>
 
+                    {/* MOBILE BOTTOM NAV */}
+                    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0f172a]/95 backdrop-blur-xl border-t border-white/10 p-2 px-4 flex justify-between z-50 items-center">
+                        <button onClick={()=>setViewMode('wiki')} className={`flex flex-col items-center p-2 rounded-xl ${viewMode==='wiki'?theme.accent:'text-gray-500'}`}><Search size={22}/><span className="text-[10px] font-bold mt-1">Wiki</span></button>
+                        <button onClick={()=>setViewMode('game')} className={`flex flex-col items-center p-2 rounded-xl relative ${viewMode==='game'?'text-purple-400':'text-gray-500'}`}><Dice size={22}/>{pendingGames.length>0 && <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border border-gray-900"></span>}<span className="text-[10px] font-bold mt-1">Juego</span></button>
+                        <button onClick={()=>setViewMode('dates')} className={`flex flex-col items-center p-2 rounded-xl ${viewMode==='dates'?'text-orange-400':'text-gray-500'}`}><CalendarIcon size={22}/><span className="text-[10px] font-bold mt-1">Fechas</span></button>
+                        <button onClick={()=>setViewMode('timeline')} className={`flex flex-col items-center p-2 rounded-xl ${viewMode==='timeline'?'text-green-400':'text-gray-500'}`}><GitCommit size={22}/><span className="text-[10px] font-bold mt-1">Historia</span></button>
+                        <button onClick={()=>setShowSettings(true)} className={`flex flex-col items-center p-2 rounded-xl text-gray-500`}><SettingsIcon size={22}/><span className="text-[10px] font-bold mt-1">Ajustes</span></button>
+                    </nav>
+
+                    {/* MOBILE TOP PROFILE SELECTOR (Only in Wiki) */}
+                    <div className="md:hidden mb-6 flex justify-center">
+                        {viewMode==='wiki' && (
+                            <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/5 shadow-inner">
+                                <button onClick={()=>setActiveProfile('novia')} className={`px-6 py-2 rounded-xl font-bold flex gap-2 text-sm transition-all ${activeProfile==='novia'?'bg-rose-900/90 text-white shadow-md':'text-gray-500'}`}><Heart size={16} className={activeProfile==='novia'?'fill-current':''}/> Flor</button>
+                                <button onClick={()=>setActiveProfile('novio')} className={`px-6 py-2 rounded-xl font-bold flex gap-2 text-sm transition-all ${activeProfile==='novio'?'bg-sky-900/90 text-white shadow-md':'text-gray-500'}`}><User size={16} className={activeProfile==='novio'?'fill-current':''}/> Terequito</button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* POST-IT NOTE (Visible on Wiki & Dates) */}
+                    {(viewMode === 'wiki' || viewMode === 'dates') && (
+                        <div className="post-it-bg p-4 rounded-br-3xl rounded-tl-2xl shadow-xl transform rotate-1 hover:rotate-0 transition-all relative max-w-sm mx-auto mb-8 border border-yellow-400/50">
+                            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-12 h-6 bg-red-500/20 backdrop-blur-sm shadow-sm rounded-sm"></div>
+                            {isEditingPostIt ? (
+                                <div 
+                                    contentEditable 
+                                    suppressContentEditableWarning
+                                    onBlur={savePostIt}
+                                    className="font-handwriting text-xl text-yellow-900 outline-none min-h-[60px] leading-relaxed text-center p-2"
+                                    autoFocus
+                                >{postItText}</div>
+                            ) : (
+                                <div onClick={()=>setIsEditingPostIt(true)} className="font-handwriting text-xl text-yellow-900 min-h-[60px] cursor-pointer flex items-center justify-center text-center leading-relaxed">
+                                    {postItText}
+                                </div>
+                            )}
+                            <span className="absolute bottom-2 right-3 text-[10px] text-yellow-700/50 font-sans uppercase font-bold">Nota del día</span>
+                        </div>
+                    )}
+
+                    {/* ============================================================== */}
+                    {/* TIMELINE VIEW */}
+                    {/* ============================================================== */}
+                    {viewMode === 'timeline' && (
+                        <div className="fade-in max-w-2xl mx-auto space-y-6">
+                            <h2 className="text-3xl font-bold mb-8 text-center text-green-200">Nuestra Línea de Tiempo</h2>
+                            <div className="relative border-l-2 border-white/20 pl-6 ml-4 space-y-8">
+                                {getTimelineData().map((item, idx) => (
+                                    <div key={idx} className="relative">
+                                        <div className={`absolute -left-[35px] w-6 h-6 rounded-full border-4 border-[#0f172a] flex items-center justify-center ${item.type==='start'?'bg-red-500':item.type==='date'?'bg-orange-500':'bg-blue-500'}`}>
+                                            {item.type==='start' && <Heart size={10} className="text-white fill-white"/>}
+                                        </div>
+                                        <div className="glass-panel p-5 rounded-2xl border border-white/5 hover:bg-white/5 transition-all">
+                                            <span className="text-xs text-gray-400 font-bold tracking-wider mb-2 block">{item.date || new Date(item.timestamp).toLocaleDateString()}</span>
+                                            <h3 className={`font-bold text-lg mb-1 ${item.type==='start'?'text-red-400':item.type==='date'?'text-orange-300':'text-white'}`}>{item.title}</h3>
+                                            {item.type === 'wiki' && <p className="text-sm text-gray-300 opacity-80 mt-2 line-clamp-2">{item.answer}</p>}
+                                            {item.type === 'date' && <p className="text-xs text-orange-400/80 mt-1 flex gap-1 items-center"><CalendarIcon size={12}/> Evento Anual</p>}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ============================================================== */}
+                    {/* DATES VIEW */}
+                    {/* ============================================================== */}
                     {viewMode === 'dates' && (
                         <div className="fade-in max-w-3xl mx-auto space-y-8">
-                            
-                            {/* TARJETA DE HISTORIA */}
                             <div className="glass-panel p-8 rounded-3xl shadow-xl border-t-2 border-orange-500 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 opacity-10 p-4"><Heart size={120} className="text-red-500"/></div>
                                 <h2 className="text-3xl font-bold text-orange-200 mb-6 flex items-center gap-3"><Heart className="text-red-500"/> Nuestra Historia</h2>
-                                
                                 {relationshipStart && !showDateInput ? (
                                     <div className="space-y-6 relative z-10">
                                         <div className="grid grid-cols-3 gap-4 text-center">
-                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-4xl font-bold text-white">{duration.years}</p><p className="text-gray-400 text-xs uppercase tracking-wide font-bold">Años</p></div>
-                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-4xl font-bold text-white">{duration.months}</p><p className="text-gray-400 text-xs uppercase tracking-wide font-bold">Meses</p></div>
-                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-4xl font-bold text-white">{duration.days}</p><p className="text-gray-400 text-xs uppercase tracking-wide font-bold">Días</p></div>
+                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-3xl md:text-4xl font-bold text-white">{calculateDuration(relationshipStart).years}</p><p className="text-gray-400 text-xs uppercase tracking-wide font-bold">Años</p></div>
+                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-3xl md:text-4xl font-bold text-white">{calculateDuration(relationshipStart).months}</p><p className="text-gray-400 text-xs uppercase tracking-wide font-bold">Meses</p></div>
+                                            <div className="bg-white/5 p-4 rounded-2xl border border-white/10"><p className="text-3xl md:text-4xl font-bold text-white">{calculateDuration(relationshipStart).days}</p><p className="text-gray-400 text-xs uppercase tracking-wide font-bold">Días</p></div>
                                         </div>
                                         <div className="bg-gradient-to-r from-red-900/80 to-orange-900/80 text-white p-4 rounded-xl flex justify-between items-center shadow-lg border border-red-800/50">
                                             <div>
-                                                <p className="text-orange-200 text-sm uppercase font-bold">Próximo Aniversario</p>
-                                                <p className="font-bold text-lg text-white">Faltan {daysToAnniversary} días 🎉</p>
+                                                <p className="text-orange-200 text-xs md:text-sm uppercase font-bold">Próximo Aniversario</p>
+                                                <p className="font-bold md:text-lg text-white">Faltan {getDaysUntil({date: relationshipStart, repeats: true})} días 🎉</p>
                                             </div>
-                                            <button onClick={()=>setShowDateInput(true)} className="text-orange-200 hover:text-white"><Edit2 size={18}/></button>
+                                            <button onClick={()=>setShowDateInput(true)} className="text-orange-200 hover:text-white p-2 bg-black/20 rounded-lg"><Edit2 size={18}/></button>
                                         </div>
                                     </div>
                                 ) : (
@@ -526,98 +622,84 @@
                                         <p className="text-gray-300 mb-4">¿Cuándo comenzó su historia?</p>
                                         <div className="flex gap-2 justify-center">
                                             <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 border rounded-xl" />
-                                            <button onClick={handleSaveRelationshipDate} className="bg-gradient-to-r from-orange-700 to-red-700 text-white px-6 py-3 rounded-xl font-bold shadow hover:from-orange-600 hover:to-red-600">Guardar Inicio</button>
-                                            {relationshipStart && <button onClick={()=>setShowDateInput(false)} className="text-gray-400 px-3">Cancelar</button>}
+                                            <button onClick={async ()=>{ if(newDateValue){ await getBaseRef().collection('settings').doc('relationship').set({date: newDateValue}); setShowDateInput(false); } }} className="bg-orange-700 text-white px-6 py-3 rounded-xl font-bold shadow hover:bg-orange-600">Guardar</button>
                                         </div>
                                     </div>
                                 )}
                             </div>
 
-                            {/* AGREGAR / EDITAR FECHA */}
-                            <div className="glass-panel p-8 rounded-3xl shadow-xl text-center text-white border-t-2 border-white/10">
-                                <h2 className="text-2xl font-bold mb-6 text-orange-200 text-left flex gap-2 items-center"><CalendarIcon/> {editingDateId ? 'Editar Fecha' : 'Eventos Especiales'}</h2>
-                                <form onSubmit={handleSaveDate} className="flex flex-col gap-4 bg-black/20 p-4 rounded-2xl text-left border border-white/5">
+                            <div className="glass-panel p-6 md:p-8 rounded-3xl shadow-xl border-t-2 border-white/10">
+                                <h2 className="text-2xl font-bold mb-6 text-orange-200 flex gap-2 items-center"><CalendarIcon/> {editingDateId ? 'Editar Fecha' : 'Eventos Especiales'}</h2>
+                                <form onSubmit={handleSaveDate} className="flex flex-col gap-4 bg-black/20 p-4 rounded-2xl border border-white/5">
                                     <div className="flex flex-col md:flex-row gap-4">
-                                        <input value={newDateTitle} onChange={e=>setNewDateTitle(e.target.value)} placeholder="Título (ej: Viaje a París)" className="flex-1 p-3 rounded-xl bg-black/40 border border-white/10 text-white focus:border-orange-500/50" required />
-                                        <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 rounded-xl bg-black/40 border border-white/10 text-white focus:border-orange-500/50" required />
+                                        <input value={newDateTitle} onChange={e=>setNewDateTitle(e.target.value)} placeholder="Título (ej: Viaje a París)" className="flex-1 p-3 rounded-xl" required />
+                                        <input type="date" value={newDateValue} onChange={e=>setNewDateValue(e.target.value)} className="p-3 rounded-xl" required />
                                     </div>
-                                    <div className="flex items-center justify-between bg-white/5 p-3 rounded-xl">
-                                        <label className="flex items-center gap-3 cursor-pointer select-none">
-                                            <input type="checkbox" checked={newDateRepeats} onChange={e=>setNewDateRepeats(e.target.checked)} className="w-5 h-5 rounded bg-transparent border-orange-500 text-orange-500 focus:ring-0" />
-                                            <span className="text-sm font-bold text-gray-300">Repetir cada año <span className="font-normal opacity-60 block text-xs">(Cumpleaños, Aniversarios)</span></span>
+                                    <div className="flex flex-wrap items-center justify-between bg-white/5 p-3 rounded-xl gap-4">
+                                        <label className="flex items-center gap-3 cursor-pointer">
+                                            <input type="checkbox" checked={newDateRepeats} onChange={e=>setNewDateRepeats(e.target.checked)} className="w-5 h-5 rounded border-orange-500 text-orange-500 focus:ring-0" />
+                                            <span className="text-sm font-bold text-gray-300">Repetir cada año</span>
                                         </label>
-                                        <div className="flex gap-3">
-                                            {editingDateId && <button type="button" onClick={handleCancelDateEdit} className="text-gray-400 hover:text-white font-bold px-4 py-2">Cancelar</button>}
-                                            <button type="submit" className="bg-orange-700 hover:bg-orange-600 text-white font-bold px-6 py-2 rounded-xl shadow transition-colors">{editingDateId ? 'Actualizar' : 'Agregar'}</button>
+                                        <div className="flex gap-3 flex-1 md:flex-none justify-end">
+                                            {editingDateId && <button type="button" onClick={()=>{setEditingDateId(null); setNewDateTitle(''); setNewDateValue('');}} className="text-gray-400 font-bold px-4">Cancelar</button>}
+                                            <button type="submit" className="bg-orange-700 hover:bg-orange-600 text-white font-bold px-6 py-2 rounded-xl transition-colors">{editingDateId ? 'Actualizar' : 'Agregar'}</button>
                                         </div>
                                     </div>
                                 </form>
                             </div>
 
-                            {/* LISTA DE FECHAS */}
                             <div className="grid gap-4">
                                 {datesList.sort((a,b) => getDaysUntil(a) - getDaysUntil(b)).map(date => {
-                                    const daysLeft = getDaysUntil(date);
-                                    const isToday = daysLeft === 0;
-                                    const isPast = daysLeft < 0;
-                                    const isEditing = editingDateId === date.id;
-                                    const cardClass = isEditing ? 'border-orange-500 ring-1 ring-orange-500 bg-orange-900/20' : isToday ? 'border-yellow-500 celebration-card bg-yellow-900/20' : isPast ? 'border-gray-700 opacity-60 bg-black/40' : 'border-white/10 bg-black/20';
+                                    const days = getDaysUntil(date);
                                     return (
-                                        <div key={date.id} className={`p-6 rounded-2xl shadow border-l-4 relative flex items-center justify-between backdrop-blur-md transition-all ${cardClass}`}>
+                                        <div key={date.id} className={`p-5 rounded-2xl shadow border-l-4 flex items-center justify-between transition-all ${days===0 ? 'border-yellow-500 celebration-card bg-yellow-900/20' : days<0 ? 'border-gray-700 bg-black/40 opacity-60' : 'border-white/10 bg-black/20'}`}>
                                             <div>
-                                                <h3 className="font-bold text-xl text-white flex items-center gap-3">
-                                                    {date.title}
-                                                    {date.repeats !== false && <Repeat size={16} className="text-gray-500" title="Se repite anualmente"/>}
-                                                </h3>
+                                                <h3 className="font-bold text-lg text-white flex items-center gap-2">{date.title} {date.repeats!==false && <Repeat size={14} className="text-gray-500"/>}</h3>
                                                 <p className="text-gray-400 text-sm flex items-center gap-2 mt-1">
-                                                    <CalendarIcon size={16} className="text-gray-500"/> {formatDateDisplay(date.date)} 
-                                                    {isToday ? 
-                                                        <span className="bg-yellow-600 text-white px-2 py-0.5 rounded text-xs font-bold">¡HOY!</span> : 
-                                                        isPast ? 
-                                                            <span className="bg-gray-800 text-gray-500 px-2 py-0.5 rounded text-xs border border-gray-700">Pasó hace {Math.abs(daysLeft)} días</span> : 
-                                                            <span className="bg-orange-900/40 text-orange-200 px-2 py-0.5 rounded text-xs border border-orange-800/50">Faltan {daysLeft} días</span>
-                                                    }
+                                                    {new Date(date.date).toLocaleDateString()} 
+                                                    {days===0 ? <span className="bg-yellow-600 text-white px-2 py-0.5 rounded text-[10px] font-bold">¡HOY!</span> : 
+                                                     days<0 ? <span className="text-gray-500 text-xs">Pasó hace {Math.abs(days)}d</span> : 
+                                                     <span className="text-orange-300 text-xs">Faltan {days}d</span>}
                                                 </p>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                {isToday && <span className="text-2xl animate-bounce mr-2">🎉</span>}
-                                                <button onClick={()=>handleEditDate(date)} className="text-gray-500 hover:text-blue-400 p-2 rounded-lg hover:bg-white/5 transition-all" title="Editar"><Edit2 size={18}/></button>
-                                                <button onClick={()=>handleDeleteDate(date.id)} className="text-gray-500 hover:text-red-400 p-2 rounded-lg hover:bg-white/5 transition-all" title="Eliminar"><Trash2 size={18}/></button>
+                                            <div className="flex gap-1">
+                                                <button onClick={()=>{setEditingDateId(date.id); setNewDateTitle(date.title); setNewDateValue(date.date); setNewDateRepeats(date.repeats!==false); window.scrollTo(0,0);}} className="text-gray-500 hover:text-blue-400 p-2"><Edit2 size={18}/></button>
+                                                <button onClick={()=>setDeleteModal({isOpen:true, id:date.id, type:'date'})} className="text-gray-500 hover:text-red-400 p-2"><Trash2 size={18}/></button>
                                             </div>
                                         </div>
                                     );
                                 })}
-                                {datesList.length === 0 && <p className="text-center text-gray-500 mt-8 font-italic">No hay fechas guardadas aún.</p>}
                             </div>
                         </div>
                     )}
 
+                    {/* ============================================================== */}
+                    {/* GAME VIEW */}
+                    {/* ============================================================== */}
                     {viewMode === 'game' && (
                         <div className="fade-in max-w-3xl mx-auto space-y-8">
                             <div className="glass-panel p-8 rounded-3xl text-center relative overflow-hidden border-t-4 border-purple-600">
                                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-purple-900/20 to-transparent opacity-50"></div>
-                                <h2 className="text-3xl font-bold mb-6 relative z-10 text-white drop-shadow-md">✨ Preguntas de Pareja ✨</h2>
+                                <h2 className="text-3xl font-bold mb-6 relative z-10 text-white drop-shadow-md">✨ Preguntas Mágicas ✨</h2>
                                 {!gameQuestion ? (
-                                    <button onClick={handleGenerateGameQuestion} disabled={isGeneratingGame} className="bg-white/10 text-purple-200 px-8 py-4 rounded-2xl font-bold shadow-lg flex items-center gap-3 mx-auto relative z-10 backdrop-blur-md border border-purple-500/30 hover:bg-white/20 transition-all hover:scale-105">{isGeneratingGame?<div className="spinner border-purple-400"/>:<><Sparkles/> Nueva Pregunta Mágica</>}</button>
+                                    <button onClick={handleGenerateGameQuestion} disabled={isGeneratingGame} className="bg-purple-900/50 text-purple-200 px-8 py-4 rounded-2xl font-bold shadow-lg flex items-center gap-3 mx-auto relative z-10 border border-purple-500/30 hover:bg-purple-800/60 transition-all hover:scale-105">{isGeneratingGame?<div className="spinner border-purple-400"/>:<><Sparkles/> Generar Pregunta</>}</button>
                                 ) : (
-                                    <div className="bg-black/40 backdrop-blur-md p-8 rounded-2xl border border-white/10 relative z-10 text-left space-y-6">
-                                        <h3 className="text-2xl font-bold text-center mb-6 text-white leading-relaxed">"{gameQuestion}"</h3>
+                                    <div className="bg-black/40 p-6 md:p-8 rounded-2xl border border-white/10 relative z-10 text-left space-y-6">
+                                        <h3 className="text-xl md:text-2xl font-bold text-center mb-6 text-white leading-relaxed">"{gameQuestion}"</h3>
                                         <div className="grid md:grid-cols-2 gap-4">
                                             <div className="bg-rose-900/10 p-4 rounded-2xl border border-rose-500/20">
-                                                <p className="text-xs text-rose-400 font-bold mb-2 uppercase tracking-wider">Respuesta de Flor</p>
-                                                <textarea value={answerFlor} onChange={e=>setAnswerFlor(e.target.value)} placeholder="Escribe aquí..." className="w-full p-3 rounded-xl bg-black/30 text-white h-24 resize-none border border-white/5 focus:border-rose-500/50"></textarea>
+                                                <p className="text-xs text-rose-400 font-bold mb-2 uppercase flex items-center gap-1"><Heart size={12}/> Flor</p>
+                                                <textarea value={answerFlor} onChange={e=>setAnswerFlor(e.target.value)} className="w-full p-3 rounded-xl bg-black/30 h-24 resize-none"></textarea>
                                             </div>
                                             <div className="bg-sky-900/10 p-4 rounded-2xl border border-sky-500/20">
-                                                <p className="text-xs text-sky-400 font-bold mb-2 uppercase tracking-wider">Respuesta de Terequito</p>
-                                                <textarea value={answerTereque} onChange={e=>setAnswerTereque(e.target.value)} placeholder="Escribe aquí..." className="w-full p-3 rounded-xl bg-black/30 text-white h-24 resize-none border border-white/5 focus:border-sky-500/50"></textarea>
+                                                <p className="text-xs text-sky-400 font-bold mb-2 uppercase flex items-center gap-1"><User size={12}/> Terequito</p>
+                                                <textarea value={answerTereque} onChange={e=>setAnswerTereque(e.target.value)} className="w-full p-3 rounded-xl bg-black/30 h-24 resize-none"></textarea>
                                             </div>
                                         </div>
-                                        <div className="flex gap-3 pt-2">
+                                        <div className="flex gap-3">
                                             <button onClick={handleSaveActiveGame} className="flex-1 bg-purple-700 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-purple-600 transition-all">{answerFlor&&answerTereque?'Guardar en Wiki':'Guardar Pendiente'}</button>
-                                            <button onClick={()=>setGameQuestion('')} className="px-6 bg-white/5 text-gray-400 rounded-xl font-bold hover:bg-white/10 hover:text-white transition-all border border-white/5">Cancelar</button>
+                                            <button onClick={()=>setGameQuestion('')} className="px-6 bg-white/5 text-gray-400 rounded-xl font-bold border border-white/5">Cancelar</button>
                                         </div>
-                                        {answerFlor && answerTereque && <button onClick={handleAnalyzeGame} disabled={isAnalyzingGame} className="w-full text-purple-300 hover:text-white underline text-sm mt-4 transition-colors text-center">{isAnalyzingGame?'La IA está pensando...':'🔮 ¿Qué opina la IA?'}</button>}
-                                        {gameAnalysis && <div className="mt-4 bg-purple-900/30 border-l-4 border-purple-500 p-4 rounded-r-xl text-purple-100 text-sm leading-relaxed shadow-lg" dangerouslySetInnerHTML={{__html: marked.parse(gameAnalysis)}}></div>}
                                     </div>
                                 )}
                             </div>
@@ -627,27 +709,19 @@
                                     <h3 className="text-xl font-bold text-gray-400 mb-6 flex gap-2 items-center"><Clock className="text-purple-500"/> Turnos Pendientes</h3>
                                     <div className="grid gap-4">
                                         {pendingGames.map(g => (
-                                            <div key={g.id} className="glass-panel p-6 rounded-2xl border-l-4 border-purple-600 relative group hover:bg-white/5 transition-colors">
-                                                <button onClick={()=>handleSkipPendingGame(g.id)} className="absolute top-4 right-4 text-gray-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"><Trash2 size={18}/></button>
-                                                <h4 className="font-bold text-white mb-4 pr-10 text-lg leading-snug">"{g.question}"</h4>
-                                                <div className="space-y-4">
-                                                    {/* Flor Input */}
-                                                    <div className={`p-3 rounded-xl border transition-colors ${g.answerFlor ? 'bg-rose-900/20 border-rose-500/30' : 'bg-black/20 border-white/5 border-dashed'}`}>
-                                                        <div className="flex justify-between mb-2">
-                                                            <span className="text-xs font-bold text-rose-400 flex gap-2 items-center"><Heart size={12}/> Flor</span>
-                                                            {g.answerFlor && <Check size={14} className="text-green-400"/>}
-                                                        </div>
-                                                        {g.answerFlor ? <p className="text-sm text-gray-300 italic">"{g.answerFlor}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-transparent text-white rounded-lg resize-none outline-none placeholder-gray-600 focus:bg-black/20" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_flor`]:e.target.value}))} value={pendingAnswers[`${g.id}_flor`]||''}/>}
+                                            <div key={g.id} className="glass-panel p-6 rounded-2xl border-l-4 border-purple-600 relative group">
+                                                <button onClick={()=>setDeleteModal({isOpen:true, id:g.id, type:'game_skip'})} className="absolute top-4 right-4 text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100"><Trash2 size={18}/></button>
+                                                <h4 className="font-bold text-white mb-4 pr-8 text-lg">"{g.question}"</h4>
+                                                <div className="space-y-3">
+                                                    <div className={`p-3 rounded-xl border ${g.answerFlor ? 'bg-rose-900/20 border-rose-500/30' : 'bg-black/20 border-white/5 border-dashed'}`}>
+                                                        <div className="flex justify-between mb-2"><span className="text-xs font-bold text-rose-400 flex items-center gap-1"><Heart size={10}/> Flor</span>{g.answerFlor && <Check size={14} className="text-green-400"/>}</div>
+                                                        {g.answerFlor ? <p className="text-sm text-gray-300">"{g.answerFlor}"</p> : <textarea className="w-full text-sm p-2 bg-transparent text-white rounded-lg resize-none" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_flor`]:e.target.value}))}/>}
                                                     </div>
-                                                    {/* Tereque Input */}
-                                                    <div className={`p-3 rounded-xl border transition-colors ${g.answerTereque ? 'bg-sky-900/20 border-sky-500/30' : 'bg-black/20 border-white/5 border-dashed'}`}>
-                                                        <div className="flex justify-between mb-2">
-                                                            <span className="text-xs font-bold text-sky-400 flex gap-2 items-center"><User size={12}/> Terequito</span>
-                                                            {g.answerTereque && <Check size={14} className="text-green-400"/>}
-                                                        </div>
-                                                        {g.answerTereque ? <p className="text-sm text-gray-300 italic">"{g.answerTereque}"</p> : <textarea placeholder="Escribe..." className="w-full text-sm p-2 bg-transparent text-white rounded-lg resize-none outline-none placeholder-gray-600 focus:bg-black/20" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_tereque`]:e.target.value}))} value={pendingAnswers[`${g.id}_tereque`]||''}/>}
+                                                    <div className={`p-3 rounded-xl border ${g.answerTereque ? 'bg-sky-900/20 border-sky-500/30' : 'bg-black/20 border-white/5 border-dashed'}`}>
+                                                        <div className="flex justify-between mb-2"><span className="text-xs font-bold text-sky-400 flex items-center gap-1"><User size={10}/> Terequito</span>{g.answerTereque && <Check size={14} className="text-green-400"/>}</div>
+                                                        {g.answerTereque ? <p className="text-sm text-gray-300">"{g.answerTereque}"</p> : <textarea className="w-full text-sm p-2 bg-transparent text-white rounded-lg resize-none" onChange={(e)=>setPendingAnswers(p=>({...p, [`${g.id}_tereque`]:e.target.value}))}/>}
                                                     </div>
-                                                    {(!g.answerFlor || !g.answerTereque) && <button onClick={()=>handleCompletePendingGame(g)} className="w-full py-3 bg-purple-600 text-white font-bold rounded-xl mt-2 text-sm hover:bg-purple-700 transition-all shadow-lg shadow-purple-900/20">Enviar Respuesta</button>}
+                                                    {(!g.answerFlor || !g.answerTereque) && <button onClick={()=>handleCompletePendingGame(g)} className="w-full py-3 bg-purple-600 text-white font-bold rounded-xl text-sm mt-2">Enviar Respuesta</button>}
                                                 </div>
                                             </div>
                                         ))}
@@ -657,73 +731,98 @@
                         </div>
                     )}
 
+                    {/* ============================================================== */}
+                    {/* WIKI VIEW */}
+                    {/* ============================================================== */}
                     {viewMode === 'wiki' && (
                         <div className="grid md:grid-cols-12 gap-6 fade-in">
-                            {/* WIKI FORM */}
-                            <div className="md:col-span-4">
-                                <div className={`glass-panel p-6 rounded-3xl sticky top-28 border-t-4 ${theme.border}`} style={{backgroundColor: theme.glass}}>
+                            {/* FORMULARIO */}
+                            <div className="md:col-span-4 order-2 md:order-1">
+                                <div className={`glass-panel p-6 rounded-3xl sticky top-28 border-t-4 ${theme.border}`}>
                                     <div className="flex items-center justify-between mb-6">
-                                        <h2 className={`text-xl font-bold flex gap-3 ${theme.text} items-center`}>
-                                            {editingId?<Edit2 size={20}/>:<Plus size={20}/>}
-                                            {editingId?'Editar Recuerdo':'Nuevo Recuerdo'}
-                                        </h2>
-                                        {isAddingCategory && <button onClick={() => setIsAddingCategory(false)} className="text-gray-400 hover:text-white transition-colors"><X size={20}/></button>}
+                                        <h2 className={`text-xl font-bold flex gap-2 ${theme.accent} items-center`}>{editingId?<Edit2 size={20}/>:<Plus size={20}/>}{editingId?'Editar':'Nuevo Recuerdo'}</h2>
+                                        {isAddingCategory && <button onClick={() => setIsAddingCategory(false)} className="text-gray-400"><X size={20}/></button>}
                                     </div>
-                                    <form onSubmit={handleSubmit} className="space-y-5">
+                                    <form onSubmit={handleSubmit} className="space-y-4">
                                         <div>
-                                            <div className="flex justify-between mb-2"><label className={`text-xs font-bold tracking-wider ${theme.labelColor}`}>CATEGORÍA</label> {!isAddingCategory && <button type="button" onClick={()=>setIsAddingCategory(true)} className={`text-xs underline ${theme.accent} opacity-70 hover:opacity-100`}>Nueva</button>}</div>
-                                            {isAddingCategory ? <div className="flex gap-2"><input autoFocus placeholder="Nombre..." className="flex-1 p-3 rounded-xl bg-black/20 border border-white/10 text-sm text-white" value={newCategoryName} onChange={e=>setNewCategoryName(e.target.value)}/><button type="button" onClick={handleAddCategory} className={`p-3 rounded-xl text-white ${theme.btnBg}`}><Plus size={18}/></button></div> : <select name="category" value={formData.category} onChange={handleInputChange} className="w-full p-3.5 border rounded-xl bg-black/20 border-white/10 text-white focus:border-white/30">{categories.map(c=><option key={c} value={c}>{c}</option>)}</select>}
+                                            <div className="flex justify-between mb-1"><label className="text-[10px] font-bold tracking-wider text-gray-400">CATEGORÍA</label> {!isAddingCategory && <button type="button" onClick={()=>setIsAddingCategory(true)} className={`text-[10px] underline ${theme.accent}`}>Nueva</button>}</div>
+                                            {isAddingCategory ? <div className="flex gap-2"><input autoFocus placeholder="Nombre..." className="flex-1 p-3 rounded-xl text-sm" value={newCategoryName} onChange={e=>setNewCategoryName(e.target.value)}/><button type="button" onClick={handleAddCategory} className={`p-3 rounded-xl text-white ${theme.bg}`}><Plus size={18}/></button></div> : <select name="category" value={formData.category} onChange={handleInputChange} className="w-full p-3 rounded-xl">{categories.map(c=><option key={c} value={c}>{c}</option>)}</select>}
                                         </div>
-                                        <div><label className={`text-xs font-bold tracking-wider mb-2 block ${theme.labelColor}`}>PREGUNTA</label><input name="question" value={formData.question} onChange={handleInputChange} placeholder="Ej: ¿Cuál es su postre favorito?" className="w-full p-3.5 border rounded-xl bg-black/20 border-white/10 text-white focus:border-white/30" required /></div>
-                                        <div><label className={`text-xs font-bold tracking-wider mb-2 block ${theme.labelColor}`}>RESPUESTA</label><textarea name="answer" value={formData.answer} onChange={handleInputChange} placeholder="Escribe el detalle aquí..." className="w-full p-3.5 border rounded-xl h-32 resize-none bg-black/20 border-white/10 text-white focus:border-white/30 leading-relaxed" required /></div>
-                                        <div className="flex gap-3 pt-2">{editingId && <button type="button" onClick={handleCancelEdit} className="px-5 bg-white/5 text-gray-400 rounded-xl font-bold hover:bg-white/10 hover:text-white transition-all border border-white/5">Cancelar</button>}<button type="submit" className={`flex-1 py-3.5 text-white font-bold rounded-xl shadow-lg ${theme.btnBg} transition-all`}>{editingId?'Actualizar':'Guardar en Wiki'}</button></div>
+                                        <div><label className="text-[10px] font-bold tracking-wider mb-1 block text-gray-400">TÍTULO / PREGUNTA</label><input name="question" value={formData.question} onChange={handleInputChange} placeholder="Ej: Canción favorita" className="w-full p-3 rounded-xl" required /></div>
+                                        
+                                        {/* Rich Text Area */}
+                                        <div>
+                                            <label className="text-[10px] font-bold tracking-wider mb-1 block text-gray-400">DETALLE</label>
+                                            <div className="bg-black/20 border border-white/10 rounded-xl overflow-hidden focus-within:border-white/30 transition-colors">
+                                                {/* Toolbar */}
+                                                <div className="flex items-center gap-1 p-2 bg-white/5 border-b border-white/5">
+                                                    <button type="button" onClick={()=>insertFormatting('**','**')} className="p-1.5 text-gray-400 hover:text-white rounded hover:bg-white/10" title="Negrita"><BoldIcon size={14}/></button>
+                                                    <button type="button" onClick={()=>insertFormatting('*','*')} className="p-1.5 text-gray-400 hover:text-white rounded hover:bg-white/10" title="Cursiva"><ItalicIcon size={14}/></button>
+                                                    <div className="w-px h-4 bg-white/10 mx-1"></div>
+                                                    <button type="button" onClick={()=>insertFormatting('❤️')} className="p-1.5 text-rose-400 hover:text-rose-300 rounded hover:bg-white/10 text-xs" title="Corazón">❤️</button>
+                                                    <button type="button" onClick={()=>insertFormatting('✨')} className="p-1.5 text-yellow-400 hover:text-yellow-300 rounded hover:bg-white/10 text-xs" title="Brillos">✨</button>
+                                                </div>
+                                                <textarea ref={answerRef} name="answer" value={formData.answer} onChange={handleInputChange} placeholder="Escribe aquí..." className="w-full p-3 h-28 resize-none bg-transparent border-none focus:ring-0 text-sm leading-relaxed" required />
+                                            </div>
+                                        </div>
+
+                                        {/* Image Support */}
+                                        <div>
+                                            <label className="text-[10px] font-bold tracking-wider mb-1 flex items-center gap-1 text-gray-400"><ImageIcon size={12}/> IMAGEN (URL OPCIONAL)</label>
+                                            <input type="url" name="imageUrl" value={formData.imageUrl} onChange={handleInputChange} placeholder="https://ejemplo.com/foto.jpg" className="w-full p-3 rounded-xl text-sm" />
+                                        </div>
+
+                                        <div className="flex gap-2 pt-2">{editingId && <button type="button" onClick={handleCancelEdit} className="px-4 bg-white/5 text-gray-400 rounded-xl font-bold text-sm">Cancelar</button>}<button type="submit" className={`flex-1 py-3 text-white font-bold rounded-xl shadow-lg ${theme.bg} ${theme.hover} transition-all`}>{editingId?'Guardar':'Crear'}</button></div>
                                     </form>
                                 </div>
                             </div>
-                            {/* WIKI LIST & ORACLE */}
-                            <div className="md:col-span-8 space-y-6">
-                                {/* ORACULO CARD - REDISEÑADA AMIGABLE */}
-                                <div className={`glass-panel p-8 rounded-3xl shadow-xl relative overflow-hidden border border-white/10 flex flex-col md:flex-row items-center gap-6`}>
-                                    <div className="flex-1 w-full">
-                                        <h2 className={`text-2xl font-bold mb-3 flex gap-3 ${theme.accent} items-center`}><Sparkles size={24}/> Oráculo de {activeProfile==='novia'?'Flor':'Terequito'}</h2>
-                                        <p className="text-gray-400 text-sm mb-6 leading-relaxed opacity-90">Pregunta lo que quieras. La IA analizará toda la base de datos para darte la mejor respuesta.</p>
-                                        <form onSubmit={handleAskAI} className="flex gap-3 w-full">
-                                            <input value={aiQuery} onChange={e=>setAiQuery(e.target.value)} placeholder={`Ej: ¿Qué le puedo regalar a ${activeProfile==='novia'?'Flor':'Terequito'}?`} className="flex-1 p-4 rounded-2xl text-white bg-black/30 border border-white/10 placeholder-gray-500 focus:bg-black/40 transition-all shadow-inner" />
-                                            <button type="submit" disabled={isAiThinking} className="bg-white text-gray-900 px-6 rounded-2xl font-bold shadow-lg hover:bg-gray-100 hover:scale-105 transition-all flex items-center justify-center min-w-[60px]">{isAiThinking?<div className="spinner border-gray-900"/>:'Ir'}</button>
-                                        </form>
-                                        {aiResponse && <div className="mt-6 bg-black/20 p-6 rounded-2xl backdrop-blur-md border border-white/10 text-white text-sm leading-relaxed shadow-inner markdown-body animate-in fade-in zoom-in duration-300" dangerouslySetInnerHTML={{__html: marked.parse(aiResponse)}} />}
-                                    </div>
-                                    <div className={`hidden md:flex items-center justify-center p-6 rounded-full bg-white/5 border border-white/5 ${theme.glow} animate-pulse`}>
-                                        <Sparkles size={80} className={theme.text} strokeWidth={1} />
-                                    </div>
+
+                            {/* LISTA DE WIKI Y BUSCADOR */}
+                            <div className="md:col-span-8 space-y-6 order-1 md:order-2">
+                                {/* CATEGORY CHIPS */}
+                                <div className="flex overflow-x-auto hide-scroll gap-2 pb-2">
+                                    <button onClick={()=>setActiveCategoryFilter('Todas')} className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all ${activeCategoryFilter==='Todas' ? `${theme.bg} text-white shadow-lg` : 'bg-black/30 text-gray-400 hover:text-white'}`}>Todas</button>
+                                    {categories.map(c => {
+                                        const count = entries.filter(e => e.target === activeProfile && e.category === c).length;
+                                        if (count === 0) return null;
+                                        return <button key={c} onClick={()=>setActiveCategoryFilter(c)} className={`px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-all border border-white/5 ${activeCategoryFilter===c ? `${theme.bg} text-white shadow-lg` : 'bg-black/20 text-gray-400 hover:text-white'}`}>{c} <span className="opacity-60 ml-1 text-[10px]">{count}</span></button>
+                                    })}
                                 </div>
 
-                                <div className="flex items-center gap-4 mb-6">
-                                     <div className={`p-4 rounded-full glass-panel flex items-center justify-center ${theme.text}`}>
-                                        <Search size={24} />
-                                    </div>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Buscar en la wiki..." 
-                                        value={searchTerm} 
-                                        onChange={e=>setSearchTerm(e.target.value)} 
-                                        className="flex-1 p-4 px-6 rounded-full glass-panel border border-white/10 outline-none text-gray-200 placeholder-gray-500 focus:ring-2 focus:ring-white/10 transition-all shadow-lg"
-                                    />
+                                <div className="flex items-center gap-3">
+                                     <div className={`p-3.5 rounded-2xl glass-panel ${theme.accent}`}><Search size={20} /></div>
+                                    <input type="text" placeholder={`Buscar en recuerdos de ${activeProfile==='novia'?'Flor':'Terequito'}...`} value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="flex-1 p-3.5 px-5 rounded-2xl glass-panel text-white focus:ring-1 focus:ring-white/20" />
                                 </div>
 
                                 <div className="grid gap-4">
-                                    {entries.filter(e=>e.target===activeProfile && (e.question.toLowerCase().includes(searchTerm.toLowerCase()) || e.answer.toLowerCase().includes(searchTerm.toLowerCase()) || e.category.toLowerCase().includes(searchTerm.toLowerCase()))).map(e => (
-                                        <div key={e.id} className={`glass-panel p-6 rounded-2xl shadow border border-white/5 relative group hover:bg-white/5 transition-colors ${editingId===e.id ? `ring-1 ${theme.accent}` : ''}`}>
-                                            <span className={`text-xs font-bold px-3 py-1 rounded-full bg-white/5 border border-white/10 tracking-wide uppercase ${theme.text}`}>{e.category}</span>
-                                            <h3 className="font-bold text-lg mt-3 text-white leading-snug">{e.question}</h3>
-                                            <p className="text-gray-300 mt-2 whitespace-pre-line leading-relaxed font-light">{e.answer}</p>
-                                            <div className="mt-5 flex justify-between items-center pt-4 border-t border-white/5">
-                                                <span className="text-xs text-gray-500 font-mono">{e.date}</span>
-                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity"><button onClick={()=>handleEdit(e)} className={`p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors ${theme.accentHover}`}><Edit2 size={16}/></button><button onClick={()=>handleDelete(e.id)} className="p-2 rounded-lg bg-white/5 hover:bg-red-900/30 hover:text-red-400 text-gray-500 transition-colors"><Trash2 size={16}/></button></div>
+                                    {filteredEntries.slice(0, visibleEntriesCount).map(e => (
+                                        <div key={e.id} className={`glass-panel p-5 rounded-2xl relative group transition-colors ${editingId===e.id ? `ring-1 ${theme.accent}` : 'hover:bg-white/5'}`}>
+                                            <span className={`text-[10px] font-bold px-3 py-1 rounded-full bg-white/5 border border-white/10 uppercase ${theme.accent}`}>{e.category}</span>
+                                            <h3 className="font-bold text-lg mt-3 text-white">{e.question}</h3>
+                                            
+                                            {/* Markdown Render */}
+                                            <div className="text-gray-300 mt-2 text-sm leading-relaxed font-light markdown-body" dangerouslySetInnerHTML={{__html: marked.parse(e.answer)}}></div>
+                                            
+                                            {/* Image Render */}
+                                            {e.imageUrl && (
+                                                <div className="mt-3 rounded-xl overflow-hidden border border-white/10 max-h-64 flex justify-center bg-black/50">
+                                                    <img src={e.imageUrl} alt="Recuerdo" className="object-contain max-h-64" onError={(e)=>{e.target.style.display='none'}}/>
+                                                </div>
+                                            )}
+
+                                            <div className="mt-4 flex justify-between items-center pt-3 border-t border-white/5">
+                                                <span className="text-[10px] text-gray-500 font-mono">{e.date}</span>
+                                                <div className="flex gap-2 md:opacity-0 group-hover:opacity-100 transition-opacity"><button onClick={()=>handleEdit(e)} className="p-2 text-gray-400 hover:text-blue-400 bg-white/5 rounded-lg"><Edit2 size={16}/></button><button onClick={()=>setDeleteModal({isOpen:true, id:e.id, type:'wiki'})} className="p-2 text-gray-400 hover:text-red-400 bg-white/5 rounded-lg"><Trash2 size={16}/></button></div>
                                             </div>
                                         </div>
                                     ))}
-                                    {entries.filter(e=>e.target===activeProfile).length === 0 && <div className="text-center py-12 text-gray-600"><p>No hay recuerdos aún.</p></div>}
+                                    
+                                    {filteredEntries.length === 0 && <div className="text-center py-12 text-gray-500 bg-black/20 rounded-2xl border border-white/5">No hay recuerdos aquí aún.</div>}
+                                    
+                                    {/* Load More Pagination */}
+                                    {filteredEntries.length > visibleEntriesCount && (
+                                        <button onClick={()=>setVisibleEntriesCount(prev => prev + 15)} className="w-full py-4 text-sm font-bold text-gray-400 hover:text-white glass-panel rounded-2xl transition-colors">Cargar más recuerdos 👇</button>
+                                    )}
                                 </div>
                             </div>
                         </div>
