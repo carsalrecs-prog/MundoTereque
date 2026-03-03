@@ -99,39 +99,34 @@
 
     <script type="text/babel">
         // ==========================================
-        // ⚙️ ZONA DE CONFIGURACIÓN ⚙️
+        // ⚙️ CONFIGURACIÓN DE FIREBASE PARA GITHUB PAGES ⚙️
         // ==========================================
         
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'wiki-amor-app';
-        let fbConfig;
-        try {
-            fbConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        } catch(e) { console.error("Error config", e); }
-
-        if (!fbConfig) {
-            fbConfig = {
-                apiKey: "AIzaSyAgO63zHV7R2A7PTTMPEpl28qpXnuv1jZE",
-                authDomain: "wiki-amor.firebaseapp.com",
-                projectId: "wiki-amor",
-                storageBucket: "wiki-amor.firebasestorage.app",
-                messagingSenderId: "676402129654",
-                appId: "1:676402129654:web:199572eb9981cd10741ad7"
-            };
-        }
+        const firebaseConfig = {
+            apiKey: "AIzaSyDDmi87GxpzBS5xDRC7qLQUN3hGptQQ70g",
+            authDomain: "mundo-tereque.firebaseapp.com",
+            projectId: "mundo-tereque",
+            storageBucket: "mundo-tereque.firebasestorage.app",
+            messagingSenderId: "498391783858",
+            appId: "1:498391783858:web:791e21eac76dbeafee2cab",
+            measurementId: "G-58HLHF8FTJ"
+        };
 
         const GEMINI_MODELS_TO_TRY = [ "gemini-2.5-flash-preview-09-2025", "gemini-1.5-flash", "gemini-1.5-flash-001", "gemini-1.5-pro" ];
         const apiKey = "AIzaSyCNL7s8c4h2U_smiCzwn9Ffd9_5ACFxOKU"; 
 
         if (!firebase.apps.length) {
             try {
-                firebase.initializeApp(fbConfig);
+                firebase.initializeApp(firebaseConfig);
                 firebase.firestore().enablePersistence().catch(err => console.log("Persistencia:", err.code));
             } catch (e) { console.error("Error Firebase", e); }
         }
 
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const getBaseRef = () => db.collection('artifacts').doc(appId).collection('public').doc('data');
+        
+        // Referencia base limpia para usar en un entorno real (GitHub Pages, Vercel, etc)
+        const getBaseRef = () => db;
 
         const { useState, useEffect, useRef } = React;
 
@@ -225,43 +220,56 @@
 
             useEffect(() => {
                 const initAuth = async () => {
-                    try { 
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await auth.signInWithCustomToken(__initial_auth_token);
-                        } else {
+                    try {
+                        try {
+                            const redirectResult = await auth.getRedirectResult();
+                            if (redirectResult && redirectResult.user) {
+                                 showToast("¡Cuenta vinculada con éxito!", "success");
+                            }
+                        } catch(redirectError) {
+                            console.warn("Autenticación por redirección fallida.", redirectError);
+                        }
+                        
+                        if (!auth.currentUser) {
                             await auth.signInAnonymously(); 
                         }
-                    } catch (error) { console.error("Auth Error:", error); showToast("Error de conexión", 'error'); }
+                    } catch (error) { 
+                        console.error("Auth Error general:", error); 
+                        showToast("Error de conexión.", 'error'); 
+                    }
                 };
                 initAuth();
-                return auth.onAuthStateChanged((u) => setUser(u));
+                const unsubscribe = auth.onAuthStateChanged((u) => setUser(u));
+                return () => unsubscribe();
             }, []);
 
             useEffect(() => {
                 if (!user) return;
+                
+                // Usando rutas simples y directas para Producción (GitHub Pages)
                 const wikiRef = getBaseRef().collection('wiki_entries');
                 const unsubWiki = wikiRef.onSnapshot((snapshot) => {
                     const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => b.timestamp - a.timestamp);
                     setEntries(loaded);
-                });
+                }, (error) => console.error("Error fetching wiki:", error));
 
                 const pendingRef = getBaseRef().collection('pending_games');
                 const unsubPend = pendingRef.onSnapshot((snapshot) => {
                     const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a, b) => b.timestamp - a.timestamp);
                     setPendingGames(loaded);
-                });
+                }, (error) => console.error("Error fetching games:", error));
 
                 const datesRef = getBaseRef().collection('important_dates');
                 const unsubDates = datesRef.onSnapshot((snapshot) => {
                     const loaded = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     setDatesList(loaded);
                     checkUpcomingDates(loaded); 
-                });
+                }, (error) => console.error("Error fetching dates:", error));
                 
                 const settingsRef = getBaseRef().collection('settings');
-                const unsubRel = settingsRef.doc('relationship').onSnapshot(doc => { if(doc.exists) setRelationshipStart(doc.data().date); });
-                const unsubCat = settingsRef.doc('categories').onSnapshot(doc => { if(doc.exists) setCategories(doc.data().list || ['Básica']); });
-                const unsubPostit = settingsRef.doc('postit').onSnapshot(doc => { if(doc.exists) setPostItText(doc.data().text || "¡Que tengas un día hermoso! ❤️"); });
+                const unsubRel = settingsRef.doc('relationship').onSnapshot(doc => { if(doc.exists) setRelationshipStart(doc.data().date); }, (error) => console.error(error));
+                const unsubCat = settingsRef.doc('categories').onSnapshot(doc => { if(doc.exists) setCategories(doc.data().list || ['Básica']); }, (error) => console.error(error));
+                const unsubPostit = settingsRef.doc('postit').onSnapshot(doc => { if(doc.exists) setPostItText(doc.data().text || "¡Que tengas un día hermoso! ❤️"); }, (error) => console.error(error));
 
                 return () => { unsubWiki(); unsubPend(); unsubDates(); unsubRel(); unsubCat(); unsubPostit(); };
             }, [user]);
@@ -443,15 +451,12 @@
             const handleGoogleLink = async () => {
                 try {
                     const provider = new firebase.auth.GoogleAuthProvider();
-                    await auth.currentUser.linkWithPopup(provider);
-                    showToast("Cuenta vinculada con éxito", "success");
-                    setShowSettings(false);
+                    await auth.currentUser.linkWithRedirect(provider);
                 } catch(e) {
-                    // Manejo silencioso de errores para evitar mostrar registros rojos feos en la consola
                     if (e.code === 'auth/unauthorized-domain') {
                         showToast("Dominio bloqueado: Añade este sitio en Firebase Console (Auth > Settings > Authorized domains).", "error");
                     } else {
-                        showToast("Error al vincular con Google. Intenta realizar un respaldo manual.", "error");
+                        showToast("Error al iniciar vinculación. Intenta respaldo manual.", "error");
                     }
                 }
             };
@@ -472,7 +477,7 @@
                 return true;
             });
 
-            if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-400"><div className="spinner border-rose-500 mb-4"></div>Conectando...</div>;
+            if (!user) return <div className="min-h-screen flex flex-col items-center justify-center text-gray-400"><div className="spinner border-rose-500 mb-4"></div>Conectando a tu Nube...</div>;
 
             const theme = activeProfile === 'novia' 
                 ? { accent: 'text-rose-500', bg: 'bg-rose-900', hover: 'hover:bg-rose-800', border: 'border-rose-900', glow: 'shadow-rose-900/20' } 
@@ -504,7 +509,7 @@
                                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5"/> Vincular con Google
                                     </button>
                                     <p className="text-[10px] text-gray-500 text-center mt-2">
-                                        Nota: Para que el inicio de sesión con Google funcione, debes agregar el dominio actual en tu consola de Firebase (Authentication &gt; Settings &gt; Authorized domains). En entornos de prueba o vista previa, es normal que esté bloqueado.
+                                        Nota: Para que el inicio de sesión con Google funcione, debes agregar el dominio de GitHub Pages en tu consola de Firebase (Authentication &gt; Settings &gt; Authorized domains).
                                     </p>
                                 </div>
                             </div>
