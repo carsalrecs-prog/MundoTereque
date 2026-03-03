@@ -221,10 +221,18 @@
             useEffect(() => {
                 const initAuth = async () => {
                     try {
-                        // Se eliminó getRedirectResult para evitar la pantalla blanca y el bucle infinito
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await auth.signInWithCustomToken(__initial_auth_token);
-                        } else if (!auth.currentUser) {
+                        try {
+                            const redirectResult = await auth.getRedirectResult();
+                            if (redirectResult && redirectResult.user) {
+                                 showToast("¡Cuenta vinculada con éxito!", "success");
+                            }
+                        } catch(redirectError) {
+                            console.warn("Autenticación por redirección fallida.", redirectError);
+                        }
+                        
+                        if (!auth.currentUser) {
+                            // Ignoramos el token inyectado por el entorno de Canvas, ya que da error de "custom-token-mismatch"
+                            // al intentar conectarse a tu propio proyecto (que tiene un token de autenticación distinto)
                             await auth.signInAnonymously(); 
                         }
                     } catch (error) { 
@@ -859,3 +867,4 @@
     </script>
 </body>
 </html>
+
