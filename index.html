@@ -112,7 +112,7 @@
             measurementId: "G-58HLHF8FTJ"
         };
 
-        const GEMINI_MODELS_TO_TRY = [ "gemini-2.5-flash-preview-09-2025", "gemini-1.5-flash", "gemini-1.5-flash-001", "gemini-1.5-pro" ];
+        const GEMINI_MODELS_TO_TRY = [ "gemini-1.5-flash", "gemini-pro" ];
         const apiKey = "AIzaSyCOU6oDp0MuyEKltuusPH_ORBm7c3ss10c"; 
 
         if (!firebase.apps.length) {
@@ -333,40 +333,39 @@
             };
 
             const handleAddCategory = async () => {
-                if(newCategoryName.trim() && !categories.includes(newCategoryName)) {
-                    const newCats = [...categories, newCategoryName];
-                    await getBaseRef().collection('settings').doc('categories').set({list: newCats});
-                    setFormData(prev => ({...prev, category: newCategoryName})); setNewCategoryName(''); setIsAddingCategory(false);
-                }
-            };
+            if(newCategoryName.trim() && !categories.includes(newCategoryName)) {
+                const newCats = [...categories, newCategoryName];
+                await getBaseRef().collection('settings').doc('categories').set({list: newCats});
+                setFormData(prev => ({...prev, category: newCategoryName})); setNewCategoryName(''); setIsAddingCategory(false);
+            }
+        };
 
-            // --- JUEGOS Y AI ---
-            const fetchAI = async (prompt) => {
-                const activeKey = apiKey || "AIzaSyCh1ETP6wY9fO-nFsfmEYBcZgAB6G9LZ9E"; 
-                if(!activeKey.startsWith("AIza")) return "⚠️ Error API Key";
-                const safetySettings = [ { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE" }, { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE" } ];
-                
-                let lastError = "Error desconocido";
-                
-                for (const model of GEMINI_MODELS_TO_TRY) {
-                    try {
-                        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], safetySettings: safetySettings }) });
-                        const d = await res.json();
-                        if (d.error) {
-                            lastError = d.error.message;
-                            throw new Error(d.error.message);
-                        }
-                        return d.candidates?.[0]?.content?.parts?.[0]?.text || "La IA no respondió.";
-                    } catch (e) { 
-                        console.error("Gemini API Error:", e);
-                        continue; 
+        // --- JUEGOS Y AI ---
+        const fetchAI = async (prompt) => {
+            const activeKey = apiKey; 
+            if(!activeKey.startsWith("AIza")) return "⚠️ Error API Key";
+            
+            let lastError = "Error desconocido";
+            
+            for (const model of GEMINI_MODELS_TO_TRY) {
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeKey}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
+                    const d = await res.json();
+                    if (d.error) {
+                        lastError = d.error.message;
+                        throw new Error(d.error.message);
                     }
+                    return d.candidates?.[0]?.content?.parts?.[0]?.text || "La IA no respondió.";
+                } catch (e) { 
+                    console.error(`Gemini API Error con ${model}:`, e);
+                    continue; 
                 }
-                return `⚠️ Fallo de IA: ${lastError}. (Revisa tu API Key)`;
-            };
+            }
+            return `⚠️ Fallo de IA: ${lastError}`;
+        };
 
-            const handleGenerateGameQuestion = async () => {
-                setIsGeneratingGame(true); setGameQuestion(''); setAnswerFlor(''); setAnswerTereque('');
+        const handleGenerateGameQuestion = async () => {
+            setIsGeneratingGame(true); setGameQuestion(''); setAnswerFlor(''); setAnswerTereque('');
                 const q = await fetchAI("Genera una pregunta profunda, romántica o divertida para parejas (Flor y Terequito) para conocerse mejor. Solo escribe la pregunta directamente.");
                 setGameQuestion(q); setIsGeneratingGame(false);
             };
@@ -867,4 +866,3 @@
     </script>
 </body>
 </html>
-
